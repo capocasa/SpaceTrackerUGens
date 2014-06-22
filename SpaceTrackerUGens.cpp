@@ -2,14 +2,6 @@
 
 static InterfaceTable *ft;
 
-// UTILITY
-
-// These were copy/pasted from DelayUGens.cpp for no other
-// reason than that it was easy. Presumably there is a
-// better way to do this, but until finding it these
-// should be probably manually updated be kept in sync
-// with those from the source.
-
 static inline bool checkBuffer(Unit * unit, const float * bufData, uint32 bufChannels,
                  uint32 expectedChannels, int inNumSamples)
 {
@@ -30,37 +22,12 @@ handle_failure:
   return false;
 }
 
-
-inline double sc_loop(Unit *unit, double in, double hi, int loop)
-{
-  // avoid the divide if possible
-  if (in >= hi) {
-    if (!loop) {
-      unit->mDone = true;
-      return hi;
-    }
-    in -= hi;
-    if (in < hi) return in;
-  } else if (in < 0.) {
-    if (!loop) {
-      unit->mDone = true;
-      return 0.;
-    }
-    in += hi;
-    if (in >= 0.) return in;
-  } else return in;
-
-  return in - hi * floor(in/hi);
-}
-
-// MAIN
-
 struct PlayST : public Unit
 {
   double m_phase;
-  float m_prevtrig;
   float m_fbufnum;
-  int32 m_index;
+  uint32 m_index;
+  double m_nextphase;
   SndBuf *m_buf;
 };
 
@@ -73,12 +40,10 @@ void PlayST_Ctor(PlayST* unit)
   PlayST_next_k(unit, 1);
 
   unit->m_fbufnum = -1e9f;
-  unit->m_prevtrig = 0.;
-  unit->m_phase = ZIN0(3);
-
-  unit->m_index = 0; // TODO: init like seek
-
-  //ClearUnitOutputs(unit, 1);
+  unit->m_phase = 0; 
+  unit->m_nextphase = 99999.;
+  
+  ClearUnitOutputs(unit, 1);
 }
 
 void PlayST_next_k(PlayST *unit, int inNumSamples)
@@ -92,21 +57,15 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
   if (!checkBuffer(unit, bufData, bufChannels, numOutputs, inNumSamples))
     return;
 
-  //double loopMax = (double)(loop ? bufFrames : bufFrames - 1);
   double phase = unit->m_phase;
+  double nextphase = unit->m_nextphase;
+  uint32 index = unit->m_index;
 
-  // TODO: implement seek
-  //if (trig > 0.f && unit->m_prevtrig <= 0.f) {
-  //  unit->mDone = false;
-  //  phase = ZIN0(3);
-  //}
-  //unit->m_prevtrig = trig;
   for (int i=0; i<inNumSamples; ++i) {
-    //phase = sc_loop((Unit*)unit, phase, loopMax, loop); \
             
-    int32 iphase = (int32)phase;
-    const float* table1 = bufData + iphase * bufChannels;
-    int32 index = 0;
+    const float* table1 = bufData + index * bufChannels;
+    uint32 index = unit->m_index;
+    
     for (uint32 channel=0; channel<numOutputs; ++channel) {
       OUT(channel)[index] = table1[index++];
     }
@@ -115,6 +74,7 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
   }
   if(unit->mDone)
     DoneAction((int)ZIN0(5), unit);
+  
   unit->m_phase = phase;
 }
 
