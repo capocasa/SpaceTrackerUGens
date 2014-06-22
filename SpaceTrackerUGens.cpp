@@ -41,7 +41,7 @@ void PlayST_Ctor(PlayST* unit)
 
   unit->m_fbufnum = -1e9f;
   unit->m_phase = 0; 
-  unit->m_nextphase = 99999.;
+  unit->m_nextphase = 0;
   
   ClearUnitOutputs(unit, 1);
 }
@@ -49,8 +49,6 @@ void PlayST_Ctor(PlayST* unit)
 void PlayST_next_k(PlayST *unit, int inNumSamples)
 {
   float rate     = ZIN0(1);
-  // float trig     = ZIN0(2);
-  // int32 loop     = (int32)ZIN0(4);
 
   GET_BUF_SHARED
   int numOutputs = unit->mNumOutputs;
@@ -61,19 +59,21 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
   double nextphase = unit->m_nextphase;
   uint32 index = unit->m_index;
 
-  for (int i=0; i<inNumSamples; ++i) {
-            
-    const float* table1 = bufData + index * bufChannels;
-    uint32 index = unit->m_index;
-    
-    for (uint32 channel=0; channel<numOutputs; ++channel) {
-      OUT(channel)[index] = table1[index++];
-    }
-
-    phase += rate;
+  const float* frame = bufData + index * bufChannels;
+  
+  for (uint32 channel=1; channel<numOutputs; ++channel) {
+    OUT(channel)[0] = frame[channel];
   }
-  if(unit->mDone)
-    DoneAction((int)ZIN0(5), unit);
+
+  phase += rate;
+  
+  if (phase >= nextphase) {
+    index++;
+    nextphase = frame[bufChannels];
+  
+    unit->m_index = index;
+    unit->m_nextphase = nextphase;
+  }
   
   unit->m_phase = phase;
 }
