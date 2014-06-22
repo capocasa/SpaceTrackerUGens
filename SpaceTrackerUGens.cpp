@@ -65,7 +65,7 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
     OUT(channel)[0] = frame[channel];
   }
 
-  phase += rate;
+  phase += SAMPLEDUR;
   
   if (phase >= nextphase) {
     index++;
