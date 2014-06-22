@@ -60,6 +60,7 @@ struct PlayST : public Unit
   double m_phase;
   float m_prevtrig;
   float m_fbufnum;
+  int32 m_index;
   SndBuf *m_buf;
 };
 
@@ -75,34 +76,39 @@ void PlayST_Ctor(PlayST* unit)
   unit->m_prevtrig = 0.;
   unit->m_phase = ZIN0(3);
 
+  unit->m_index = 0; // TODO: init like seek
+
   //ClearUnitOutputs(unit, 1);
 }
 
 void PlayST_next_k(PlayST *unit, int inNumSamples)
 {
   float rate     = ZIN0(1);
-  float trig     = ZIN0(2);
-  int32 loop     = (int32)ZIN0(4);
+  // float trig     = ZIN0(2);
+  // int32 loop     = (int32)ZIN0(4);
 
   GET_BUF_SHARED
   int numOutputs = unit->mNumOutputs;
   if (!checkBuffer(unit, bufData, bufChannels, numOutputs, inNumSamples))
     return;
 
-  double loopMax = (double)(loop ? bufFrames : bufFrames - 1);
+  //double loopMax = (double)(loop ? bufFrames : bufFrames - 1);
   double phase = unit->m_phase;
-  if (trig > 0.f && unit->m_prevtrig <= 0.f) {
-    unit->mDone = false;
-    phase = ZIN0(3);
-  }
-  unit->m_prevtrig = trig;
+
+  // TODO: implement seek
+  //if (trig > 0.f && unit->m_prevtrig <= 0.f) {
+  //  unit->mDone = false;
+  //  phase = ZIN0(3);
+  //}
+  //unit->m_prevtrig = trig;
   for (int i=0; i<inNumSamples; ++i) {
-    phase = sc_loop((Unit*)unit, phase, loopMax, loop); \
-    int32 iphase = (int32)phase; \
-    const float* table1 = bufData + iphase * bufChannels; \
-    int32 index = 0; \
-    for (uint32 channel=0; channel<numOutputs; ++channel) { \
-      OUT(channel)[index] = table1[index++]; \
+    //phase = sc_loop((Unit*)unit, phase, loopMax, loop); \
+            
+    int32 iphase = (int32)phase;
+    const float* table1 = bufData + iphase * bufChannels;
+    int32 index = 0;
+    for (uint32 channel=0; channel<numOutputs; ++channel) {
+      OUT(channel)[index] = table1[index++];
     }
 
     phase += rate;
