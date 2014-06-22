@@ -10,16 +10,6 @@ static InterfaceTable *ft;
 // should be probably manually updated be kept in sync
 // with those from the source.
 
-#define LOOP_BODY_1(SAMPLE_INDEX) \
-    phase = sc_loop((Unit*)unit, phase, loopMax, loop); \
-    int32 iphase = (int32)phase; \
-    const float* table1 = bufData + iphase * bufChannels; \
-    int32 index = 0; \
-    for (uint32 channel=0; channel<numOutputs; ++channel) { \
-      OUT(channel)[SAMPLE_INDEX] = table1[index++]; \
-    }
-
-
 static inline bool checkBuffer(Unit * unit, const float * bufData, uint32 bufChannels,
                  uint32 expectedChannels, int inNumSamples)
 {
@@ -107,7 +97,13 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
   }
   unit->m_prevtrig = trig;
   for (int i=0; i<inNumSamples; ++i) {
-    LOOP_BODY_1(i)
+    phase = sc_loop((Unit*)unit, phase, loopMax, loop); \
+    int32 iphase = (int32)phase; \
+    const float* table1 = bufData + iphase * bufChannels; \
+    int32 index = 0; \
+    for (uint32 channel=0; channel<numOutputs; ++channel) { \
+      OUT(channel)[index] = table1[index++]; \
+    }
 
     phase += rate;
   }
