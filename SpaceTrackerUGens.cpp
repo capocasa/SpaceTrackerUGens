@@ -78,4 +78,9 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
   unit->m_phase = phase;
 }
 
+PluginLoad(PlayST)
+{
+    ft = inTable;
+    DefineSimpleUnit(PlayST);
+}
 
