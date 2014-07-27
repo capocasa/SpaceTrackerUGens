@@ -1,7 +1,7 @@
 #!/bin/bash
 
 NAME=SpaceTrackerUGens
-DIR=`dirname $0`/../sc3-plugins
+DIR=`dirname $0`/../../sc3-plugins
 
 CMAKE="cmake -DSUPERNOVA=ON -DSC_PATH=/usr/include/SuperCollider/ .."
 MAKE="make $NAME"

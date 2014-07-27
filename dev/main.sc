@@ -7,7 +7,7 @@
       s.sync;
       ~synth={
         var p;
-        p=SinOsc.kr(1);
+        p=PlayST.kr(1).poll;
         p.poll;
       }.play;
     }.forkIfNeeded;
