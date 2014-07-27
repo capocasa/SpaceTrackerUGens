@@ -29,6 +29,7 @@ struct PlayST : public Unit
   uint32 m_index;
   double m_next;
   SndBuf *m_buf;
+  float m_prevtrig;
 };
 
 
@@ -53,6 +54,7 @@ void PlayST_Ctor(PlayST* unit)
 void PlayST_next_k(PlayST *unit, int inNumSamples)
 {
   float rate     = ZIN0(1);
+  float trig     = ZIN0(2);
 
   GET_BUF_SHARED
   
@@ -66,9 +68,13 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
 
   const float* frame = bufData + index * bufChannels;
 
-  for (int i = 1; i < bufChannels; i++) {
-    OUT(0)[i-1] = frame[i];
+  for (int i = 1, j = 0; i != bufChannels; i++, j++) {
+    OUT(0)[j] = frame[i];
   }
+  if (trig > 0.f && unit->m_prevtrig <= 0.f) {
+    phase = ZIN0(3);  
+  }
+
 
   phase += BUFDUR;
 
@@ -81,18 +87,11 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
       next = 2147483647;
     }
     printf("\n\nSPACETRACKER DEBUG\n\n bufChannels:%i bufSamples:%i bufFrames:%i index:%i frame:%f \n\n", bufChannels, bufSamples, bufFrames, index, frame[1]);
-  }
-
-//  if (phase >= next) {
-//    //next = frame[bufChannels];
-//  
-//    unit->m_index = index;
-//    unit->m_next = next;
-//  }
-  
+  } 
   unit->m_index = index;
   unit->m_phase = phase;
   unit->m_next = next;
+  unit->m_prevtrig = trig;
 }
 
 PluginLoad(PlayST)
