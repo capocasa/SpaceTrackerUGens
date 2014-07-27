@@ -43,11 +43,7 @@ void PlayST_Ctor(PlayST* unit)
   unit->m_phase = 0; 
   unit->m_nextphase = 0;
   
-  printf("\n\nSPACETRACKER DEBUG\n\n %f %f %i\n\n", unit->m_phase, unit->m_nextphase, 13);
-  
   PlayST_next_k(unit, 1);
-
-  printf("\n\nSPACETRACKER DEBUG\n\n %f %f %i\n\n", unit->m_phase, unit->m_nextphase, 13);
 
   ClearUnitOutputs(unit, 1);
 
@@ -57,36 +53,39 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
 {
   float rate     = ZIN0(1);
 
-  //GET_BUF_SHARED
+  GET_BUF_SHARED
   
   int numOutputs = unit->mNumOutputs;
-  //if (!checkBuffer(unit, bufData, bufChannels, numOutputs, inNumSamples))
-  //  return;
+  if (!checkBuffer(unit, bufData, bufChannels, numOutputs, inNumSamples))
+    return;
 
   double phase = unit->m_phase;
   double nextphase = unit->m_nextphase;
   uint32 index = unit->m_index;
 
   // const float* frame = bufData + index * bufChannels;
-  
-  for (uint32 channel=1; channel<numOutputs; ++channel) {
-    //OUT(channel)[0] = frame[channel];
-    OUT(channel)[0] = 0.5;
-  }
 
-  phase += SAMPLEDUR;
+  OUT(0)[0] = phase;
+
+  phase += BUFDUR;
   
-  if (phase >= nextphase) {
+  if (phase > 0.4) {
+    phase = 0;
     index++;
-    if (index == 4) {
+    if (index > 5) {
       index = 0;
     }
-    //nextphase = frame[bufChannels];
-  
-    unit->m_index = index;
-    unit->m_nextphase = nextphase;
+    printf("\n\nSPACETRACKER DEBUG\n\n %i %i %i %i %f \n\n", bufChannels, numOutputs, inNumSamples, index, bufData[0]);
   }
+
+//  if (phase >= nextphase) {
+//    //nextphase = frame[bufChannels];
+//  
+//    unit->m_index = index;
+//    unit->m_nextphase = nextphase;
+//  }
   
+  unit->m_index = index;
   unit->m_phase = phase;
 }
 
