@@ -3,7 +3,14 @@
   ServerTree.add({
     
     {
-      ~buffer = Buffer.sendCollection(s, [1, 0.2, 1.5, 0.5, 1, 0.75], 2);
+      ~buffer = Buffer.sendCollection(s, 20.collect({
+        arg i;
+        if (i%2==0) {
+          0.5;
+        }{
+          0.01 * ((i-1)/2);
+        };
+      }).postln, 2);
       s.sync;
       ~synth={
         PlayST.kr(1, ~buffer)
