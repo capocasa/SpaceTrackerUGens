@@ -31,6 +31,7 @@ struct PlayST : public Unit
   SndBuf *m_buf;
 };
 
+
 static void PlayST_next_k(PlayST *unit, int inNumSamples);
 static void PlayST_Ctor(PlayST* unit);
 
@@ -42,34 +43,40 @@ void PlayST_Ctor(PlayST* unit)
   unit->m_fbufnum = -1e9f;
   unit->m_phase = 0; 
   unit->m_nextphase = 0;
-  
+
   ClearUnitOutputs(unit, 1);
+
 }
 
 void PlayST_next_k(PlayST *unit, int inNumSamples)
 {
   float rate     = ZIN0(1);
 
-  GET_BUF_SHARED
+  //GET_BUF_SHARED
+  
   int numOutputs = unit->mNumOutputs;
-  if (!checkBuffer(unit, bufData, bufChannels, numOutputs, inNumSamples))
-    return;
+  //if (!checkBuffer(unit, bufData, bufChannels, numOutputs, inNumSamples))
+  //  return;
 
   double phase = unit->m_phase;
   double nextphase = unit->m_nextphase;
   uint32 index = unit->m_index;
 
-  const float* frame = bufData + index * bufChannels;
+  // const float* frame = bufData + index * bufChannels;
   
   for (uint32 channel=1; channel<numOutputs; ++channel) {
-    OUT(channel)[0] = frame[channel];
+    //OUT(channel)[0] = frame[channel];
+    OUT(channel)[0] = 0.5+channel;
   }
 
   phase += SAMPLEDUR;
   
   if (phase >= nextphase) {
     index++;
-    nextphase = frame[bufChannels];
+    if (index == 4) {
+      index = 0;
+    }
+    //nextphase = frame[bufChannels];
   
     unit->m_index = index;
     unit->m_nextphase = nextphase;
