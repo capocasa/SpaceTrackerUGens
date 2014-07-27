@@ -42,7 +42,8 @@ void PlayST_Ctor(PlayST* unit)
   unit->m_fbufnum = -1e9f;
   unit->m_phase = 0; 
   unit->m_nextphase = 0;
-  
+  unit->index = 0;
+
   PlayST_next_k(unit, 1);
 
   ClearUnitOutputs(unit, 1);
