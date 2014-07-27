@@ -64,21 +64,23 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
   double next = unit->m_next;
   uint32 index = unit->m_index;
 
-  // const float* frame = bufData + index * bufChannels;
+  const float* frame = bufData + index * bufChannels;
 
-  OUT(0)[0] = bufData[index+1];
+  for (int i = 1; i < bufChannels; i++) {
+    OUT(0)[i-1] = frame[i];
+  }
 
   phase += BUFDUR;
 
   if (phase >= next) {
-    index += 2;
-    next += 0.3;
-    if (index < 10) {
+    index++;
+    if (index < bufFrames) {
       //next = bufData[index];
+      next += frame[0];
     } else {
-      next = 99999;
+      next = 2147483647;
     }
-    printf("\n\nSPACETRACKER DEBUG\n\n %i %i %i %i %f \n\n", bufChannels, numOutputs, inNumSamples, index, bufData[index]);
+    printf("\n\nSPACETRACKER DEBUG\n\n bufChannels:%i bufSamples:%i bufFrames:%i index:%i frame:%f \n\n", bufChannels, bufSamples, bufFrames, index, frame[1]);
   }
 
 //  if (phase >= next) {
