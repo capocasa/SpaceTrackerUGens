@@ -38,11 +38,16 @@ static void PlayST_Ctor(PlayST* unit);
 void PlayST_Ctor(PlayST* unit)
 {
   SETCALC(PlayST_next_k);
-  PlayST_next_k(unit, 1);
 
   unit->m_fbufnum = -1e9f;
   unit->m_phase = 0; 
   unit->m_nextphase = 0;
+  
+  printf("\n\nSPACETRACKER DEBUG\n\n %f %f %i\n\n", unit->m_phase, unit->m_nextphase, 13);
+  
+  PlayST_next_k(unit, 1);
+
+  printf("\n\nSPACETRACKER DEBUG\n\n %f %f %i\n\n", unit->m_phase, unit->m_nextphase, 13);
 
   ClearUnitOutputs(unit, 1);
 
@@ -66,7 +71,7 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
   
   for (uint32 channel=1; channel<numOutputs; ++channel) {
     //OUT(channel)[0] = frame[channel];
-    OUT(channel)[0] = 0.5+channel;
+    OUT(channel)[0] = 0.5;
   }
 
   phase += SAMPLEDUR;
