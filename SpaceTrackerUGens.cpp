@@ -65,16 +65,32 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
   double phase = unit->m_phase;
   double next = unit->m_next;
   uint32 index = unit->m_index;
+  double search;
 
   const float* frame = bufData + index * bufChannels;
 
-  for (int i = i, j = 1; j != bufChannels; i++, j++) {
+  for (int i = 0, j = 1; j != bufChannels; i++, j++) {
     OUT(0)[i] = frame[j];
   }
   if (trig > 0.f && unit->m_prevtrig <= 0.f) {
-    phase = ZIN0(3);  
+    search = phase;
+    phase = ZIN0(3);
+    
+    if (phase > search) {
+      while (phase > search) {
+        index++;
+        search += bufData[index];
+      }
+      phase = targetphase;
+    } else {
+      while (targetphase < phase) {
+        index--;
+        phase -= bufData[index];
+      }
+      phase = targetphase;
+    }
+    // if phase==targetphase, do nothing
   }
-
 
   phase += BUFDUR;
 
