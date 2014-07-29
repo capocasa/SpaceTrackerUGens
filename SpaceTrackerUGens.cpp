@@ -77,7 +77,7 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
     
     if (next > phase) {
       printf("ST: trackback\n");
-      while (next > phase) {
+      while (next > phase && index >= 0) {
         printf("ST: trackback index:%i next:%f phase:%f\n", index, next, phase);
         index--;
         next -= bufData[index*bufChannels];
@@ -85,7 +85,7 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
     } else {
       printf("ST: catchup\n");
       // if phase==next, do nothing
-      while (next < phase) {
+      while (next < phase && index < bufFrames) {
         printf("ST: catchup index:%i next:%f phase:%f\n", index, next, phase);
         next += bufData[index*bufChannels];
         index++;
