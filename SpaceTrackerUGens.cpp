@@ -65,7 +65,6 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
   double phase = unit->m_phase;
   double next = unit->m_next;
   uint32 index = unit->m_index;
-  double search;
 
   const float* frame = bufData + index * bufChannels;
 
@@ -77,19 +76,21 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
     phase = ZIN0(3);
     
     if (next > phase) {
-      while (next > phase && index >= 0) {
-        next -= bufData[index];
+      printf("ST: trackback\n");
+      while (next > phase) {
+        printf("ST: trackback index:%i next:%f phase:%f\n", index, next, phase);
         index--;
+        next -= bufData[index*bufChannels];
       }
-      next += bufData[index];
-      index++;
     } else {
-      while (next < phase && index < bufFrames) {
-        next += bufData[index];
+      printf("ST: catchup\n");
+      // if phase==next, do nothing
+      while (next < phase) {
+        printf("ST: catchup index:%i next:%f phase:%f\n", index, next, phase);
+        next += bufData[index*bufChannels];
         index++;
       }
     }
-    // unlikely, but if phase==next, do nothing
   } else {
 
     phase += BUFDUR;
@@ -97,7 +98,6 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
     if (phase >= next) {
       if (index < bufFrames) {
         next += frame[0];
-        printf("\n\nSPACETRACKER DEBUG\n\n bufChannels:%i bufSamples:%i bufFrames:%i index:%i frame:%f \n\n", bufChannels, bufSamples, bufFrames, index, frame[1]);
         index++;
       }
     }
