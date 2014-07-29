@@ -13,7 +13,8 @@
       }).postln, 2);
       s.sync;
       ~synth={
-        PlayST.kr(1, ~buffer)
+        arg t_trig = 0;
+        PlayST.kr(1, ~buffer, trigger:t_trig, startPos: 0.0)
           .poll;
       }.play;
     }.forkIfNeeded;
@@ -21,4 +22,5 @@
   s.reboot;
 )
 
+~synth.set(\t_trig, 1);
 
