@@ -76,17 +76,17 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
     phase = ZIN0(3);
     
     if (next > phase) {
-      printf("ST: trackback\n");
+      //printf("ST: trackback\n");
       while (next > phase && index >= 0) {
-        printf("ST: trackback index:%i next:%f phase:%f\n", index, next, phase);
+        //printf("ST: trackback index:%i next:%f phase:%f\n", index, next, phase);
         index--;
         next -= bufData[index*bufChannels];
       }
     } else {
-      printf("ST: catchup\n");
+      //printf("ST: catchup\n");
       // if phase==next, do nothing
       while (next < phase && index < bufFrames) {
-        printf("ST: catchup index:%i next:%f phase:%f\n", index, next, phase);
+        //printf("ST: catchup index:%i next:%f phase:%f\n", index, next, phase);
         next += bufData[index*bufChannels];
         index++;
       }
