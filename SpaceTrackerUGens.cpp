@@ -43,11 +43,19 @@ void PlayST_Ctor(PlayST* unit)
   unit->m_fbufnum = -1e9f;
   unit->m_phase = 0; 
   unit->m_next = 0;
+  //unit->m_next = buf->data[0];
   unit->m_index = 0;
+
+//  int bufChannels = buf->channels;
+//  const float* bufData = buf->data;
 
   PlayST_next_k(unit, 1);
 
-  ClearUnitOutputs(unit, 1);
+//  ClearUnitOutputs(unit, 1);
+
+//  for (int i = 0, j = 1; j != bufChannels; i++, j++) {
+//    OUT(0)[i] = bufData[j];
+//  }
 
 }
 
@@ -75,20 +83,31 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
   if (trig > 0.f && unit->m_prevtrig <= 0.f) {
     phase = ZIN0(3);
     
-    if (next > phase) {
-      //printf("ST: trackback\n");
-      while (next > phase && index >= 0) {
-        //printf("ST: trackback index:%i next:%f phase:%f\n", index, next, phase);
-        index--;
-        next -= bufData[index*bufChannels];
-      }
+//    printf("ST: buffer dump ");
+//    for (int i = 0; i < (bufFrames * bufChannels); i++) {
+//      printf("%f ", bufData[i]);
+//    }
+//    printf("phase:%f next:%f time:%f note:%f value:%f\n", phase, next, frame[0], frame[1], frame[2]);
+
+    if (phase == 0) {
+      next = bufData[0];
+      index = 0;
     } else {
-      //printf("ST: catchup\n");
-      // if phase==next, do nothing
-      while (next < phase && index < bufFrames) {
-        //printf("ST: catchup index:%i next:%f phase:%f\n", index, next, phase);
-        next += bufData[index*bufChannels];
-        index++;
+      if (next > phase) {
+        //printf("ST: trackback\n");
+        while (next > phase && index >= 0) {
+          //printf("ST: trackback index:%i next:%f phase:%f\n", index, next, phase);
+          index--;
+          next -= bufData[index*bufChannels];
+        }
+      } else {
+        // if phase==next, do nothing
+        //printf("ST: catchup\n");
+        while (next < phase && index < bufFrames) {
+          //printf("ST: catchup index:%i next:%f phase:%f\n", index, next, phase);
+          next += bufData[index*bufChannels];
+          index++;
+        }
       }
     }
   } else {
