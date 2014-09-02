@@ -80,7 +80,10 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
     OUT(i)[0] = frame[j];
   }
 
+  //if (index < bufFrames) printf("ST: index:%i bufnum:%i bufChannels:%i BUFDUR:%f phase:%f next:%f time:%f note:%f value:%f\n", index, (int) unit->m_fbufnum, bufChannels, BUFDUR, phase, next, frame[0], frame[1], frame[2]);
+
   if (trig > 0.f && unit->m_prevtrig <= 0.f) {
+
     phase = ZIN0(3);
     
 //    printf("ST: buffer dump ");
@@ -116,8 +119,8 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
 
     if (phase >= next) {
       if (index < bufFrames) {
-        next += frame[0];
         index++;
+        next += bufData[index*bufChannels];
       }
     }
   }
