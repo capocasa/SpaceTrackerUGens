@@ -113,9 +113,10 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
         }
       }
     }
+
   } else {
 
-    phase += BUFDUR;
+    phase += BUFDUR * rate;
 
     if (phase >= next) {
       if (index < bufFrames) {
