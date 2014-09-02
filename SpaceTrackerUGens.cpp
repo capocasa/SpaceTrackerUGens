@@ -68,8 +68,8 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
 
   const float* frame = bufData + index * bufChannels;
 
-  for (int i = 0, j = 1; j != bufChannels; i++, j++) {
-    OUT(0)[i] = frame[j];
+  for (int i = 0, j = 1; j < bufChannels; i++, j++) {
+    OUT(i)[0] = frame[j];
   }
 
   if (trig > 0.f && unit->m_prevtrig <= 0.f) {
