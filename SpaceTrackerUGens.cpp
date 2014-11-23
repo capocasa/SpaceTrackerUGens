@@ -39,11 +39,15 @@ static void PlayST_Ctor(PlayST* unit);
 void PlayST_Ctor(PlayST* unit)
 {
   SETCALC(PlayST_next_k);
+  
+  GET_BUF_SHARED
+  if (!checkBuffer(unit, bufData, bufChannels, unit->mNumOutputs, 1))
+    return;
 
   unit->m_fbufnum = -1e9f;
   unit->m_phase = 0; 
-  unit->m_next = 0;
-  //unit->m_next = buf->data[0];
+  //unit->m_next = 0;
+  unit->m_next = buf->data[0];
   unit->m_index = 0;
 
 //  int bufChannels = buf->channels;
@@ -77,7 +81,11 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
   const float* frame = bufData + index * bufChannels;
 
   for (int i = 0, j = 1; j < bufChannels; i++, j++) {
-    OUT(i)[0] = frame[j];
+    if (rate > 0) {
+      OUT(i)[0] = frame[j];
+    } else {
+      OUT(i)[0] = 0;
+    }
   }
 
   //if (index < bufFrames) printf("ST: index:%i bufnum:%i bufChannels:%i BUFDUR:%f phase:%f next:%f time:%f note:%f value:%f\n", index, (int) unit->m_fbufnum, bufChannels, BUFDUR, phase, next, frame[0], frame[1], frame[2]);
