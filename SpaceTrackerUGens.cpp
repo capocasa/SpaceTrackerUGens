@@ -80,13 +80,7 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
 
   const float* frame = bufData + index * bufChannels;
 
-  for (int i = 0, j = 1; j < bufChannels; i++, j++) {
-    if (rate > 0) {
-      OUT(i)[0] = frame[j];
-    } else {
-      OUT(i)[0] = 0;
-    }
-  }
+  int silentFrame = 0;
 
   //if (index < bufFrames) printf("ST: index:%i bufnum:%i bufChannels:%i BUFDUR:%f phase:%f next:%f time:%f note:%f value:%f\n", index, (int) unit->m_fbufnum, bufChannels, BUFDUR, phase, next, frame[0], frame[1], frame[2]);
 
@@ -130,7 +124,16 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
       if (index < bufFrames) {
         index++;
         next += bufData[index*bufChannels];
+        silentFrame = 1;
       }
+    }
+  }
+  
+  for (int i = 0, j = 1; j < bufChannels; i++, j++) {
+    if (rate > 0 && silentFrame == 0) {
+      OUT(i)[0] = frame[j];
+    } else {
+      OUT(i)[0] = 0;
     }
   }
 
