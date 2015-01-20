@@ -69,9 +69,19 @@ struct PlayST : public Unit
   float m_prevtrig;
 };
 
+struct RecordST : public Unit
+{
+  float m_fbufnum;
+  SndBuf *m_buf;
+  int32 m_writepos;
+  float **mIn;
+};
 
 static void PlayST_next_k(PlayST *unit, int inNumSamples);
 static void PlayST_Ctor(PlayST* unit);
+
+static void RecordST_next(RecordST *unit, int inNumSamples);
+static void RecordST_Ctor(RecordST *unit);
 
 void PlayST_Ctor(PlayST* unit)
 {
@@ -180,9 +190,31 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
   unit->m_prevtrig = trig;
 }
 
+void RecordST_Ctor(RecordST *unit)
+{
+  unit->mIn = 0;
+  unit->m_writepos = 0;
+  SETCALC(RecordST_next);
+}
+
+void RecordST_Dtor(RecordST *unit)
+{
+  TAKEDOWN_IN
+}
+
+void RecordST_next(RecordST *unit, int inNumSamples)
+{
+  GET_BUF
+  CHECK_BUF
+  SETUP_IN(8)
+
+  int32 writepos = unit->m_writepos;
+}
+
 PluginLoad(PlayST)
 {
     ft = inTable;
     DefineSimpleUnit(PlayST);
 }
+
 
