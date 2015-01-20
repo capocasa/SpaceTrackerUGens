@@ -22,6 +22,43 @@ handle_failure:
   return false;
 }
 
+// from server/plugins/DelayUGens.cpp
+// keep in sync manually
+#define TAKEDOWN_IN \
+  if(unit->mIn){ \
+    RTFree(unit->mWorld, unit->mIn); \
+  }
+
+#define CHECK_BUF \
+  if (!bufData) { \
+                unit->mDone = true; \
+    ClearUnitOutputs(unit, inNumSamples); \
+    return; \
+  }
+#define SETUP_IN(offset) \
+  uint32 numInputs = unit->mNumInputs - (uint32)offset; \
+  if (numInputs != bufChannels) { \
+    if(unit->mWorld->mVerbosity > -1 && !unit->mDone){ \
+      Print("buffer-writing UGen channel mismatch: numInputs %i, yet buffer has %i channels\n", numInputs, bufChannels); \
+    } \
+    unit->mDone = true; \
+    ClearUnitOutputs(unit, inNumSamples); \
+    return; \
+  } \
+  if(!unit->mIn){ \
+    unit->mIn = (float**)RTAlloc(unit->mWorld, numInputs * sizeof(float*)); \
+    if (unit->mIn == NULL) { \
+      unit->mDone = true; \
+      ClearUnitOutputs(unit, inNumSamples); \
+      return; \
+    } \
+  } \
+  float **in = unit->mIn; \
+  for (uint32 i=0; i<numInputs; ++i) { \
+    in[i] = ZIN(i+offset); \
+  }
+// end server/plugins/DelayUGens.cpp
+
 struct PlayST : public Unit
 {
   double m_phase;
