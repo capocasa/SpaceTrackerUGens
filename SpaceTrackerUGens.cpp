@@ -2,26 +2,7 @@
 
 static InterfaceTable *ft;
 
-static inline bool checkBuffer(Unit * unit, const float * bufData, uint32 bufChannels,
-                 uint32 expectedChannels, int inNumSamples)
-{
-  if (!bufData)
-    goto handle_failure;
-
-  if (expectedChannels > bufChannels) {
-    if(unit->mWorld->mVerbosity > -1 && !unit->mDone)
-      Print("Buffer UGen channel mismatch: expected %i, yet buffer has %i channels\n",
-          expectedChannels, bufChannels);
-    goto handle_failure;
-  }
-  return true;
-
-handle_failure:
-  unit->mDone = true;
-  ClearUnitOutputs(unit, inNumSamples);
-  return false;
-}
-
+// For RecordST
 // from server/plugins/DelayUGens.cpp
 // keep in sync manually
 #define TAKEDOWN_IN \
@@ -59,6 +40,27 @@ handle_failure:
   }
 // end server/plugins/DelayUGens.cpp
 
+// For PlayST
+static inline bool checkBuffer(Unit * unit, const float * bufData, uint32 bufChannels,
+                 uint32 expectedChannels, int inNumSamples)
+{
+  if (!bufData)
+    goto handle_failure;
+
+  if (expectedChannels > bufChannels) {
+    if(unit->mWorld->mVerbosity > -1 && !unit->mDone)
+      Print("Buffer UGen channel mismatch: expected %i, yet buffer has %i channels\n",
+          expectedChannels, bufChannels);
+    goto handle_failure;
+  }
+  return true;
+
+handle_failure:
+  unit->mDone = true;
+  ClearUnitOutputs(unit, inNumSamples);
+  return false;
+}
+
 struct PlayST : public Unit
 {
   double m_phase;
@@ -71,16 +73,17 @@ struct PlayST : public Unit
 
 struct RecordST : public Unit
 {
-  float m_fbufnum;
-  SndBuf *m_buf;
   int32 m_writepos;
   float **mIn;
+  float m_fbufnum;
+  SndBuf *m_buf;
+  float m_prevtrig;
 };
 
 static void PlayST_next_k(PlayST *unit, int inNumSamples);
 static void PlayST_Ctor(PlayST* unit);
 
-static void RecordST_next(RecordST *unit, int inNumSamples);
+static void RecordST_next_k(RecordST *unit, int inNumSamples);
 static void RecordST_Ctor(RecordST *unit);
 
 void PlayST_Ctor(PlayST* unit)
@@ -192,29 +195,39 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
 
 void RecordST_Ctor(RecordST *unit)
 {
+
   unit->mIn = 0;
   unit->m_writepos = 0;
-  SETCALC(RecordST_next);
-}
 
+  SETCALC(RecordST_next_k);
+}
+  
 void RecordST_Dtor(RecordST *unit)
 {
   TAKEDOWN_IN
 }
 
-void RecordST_next(RecordST *unit, int inNumSamples)
+void RecordST_next_k(RecordST *unit, int inNumSamples)
 {
+
+  float run     = ZIN0(1);
+  float trig     = ZIN0(2);
+
   GET_BUF
   CHECK_BUF
   SETUP_IN(8)
 
-  int32 writepos = unit->m_writepos;
+  int writepos = unit->m_writepos;
+  int prevtrig = unit->m_prevtrig;
+
+  unit->m_writepos = writepos;
+  unit->m_prevtrig = prevtrig;
 }
 
 PluginLoad(PlayST)
 {
     ft = inTable;
     DefineSimpleUnit(PlayST);
+    DefineDtorUnit(RecordST);
 }
-
 
