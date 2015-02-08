@@ -198,6 +198,7 @@ void RecordST_Ctor(RecordST *unit)
 
   unit->mIn = 0;
   unit->m_writepos = 0;
+  unit->m_prevtrig = 0;
 
   SETCALC(RecordST_next_k);
 }
@@ -221,7 +222,8 @@ void RecordST_next_k(RecordST *unit, int inNumSamples)
   int prevtrig = unit->m_prevtrig;
 
   unit->m_writepos = writepos;
-  unit->m_prevtrig = prevtrig;
+  unit->m_prevtrig = trig;
+
 }
 
 PluginLoad(PlayST)
