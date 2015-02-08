@@ -206,6 +206,8 @@ void RecordST_Ctor(RecordST *unit)
   unit->m_lastphase = 0;
 
   SETCALC(RecordST_next_k);
+
+  ClearUnitOutputs(unit, 1);
 }
   
 void RecordST_Dtor(RecordST *unit)
