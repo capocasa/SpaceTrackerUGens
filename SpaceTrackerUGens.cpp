@@ -213,7 +213,7 @@ void RecordST_next_k(RecordST *unit, int inNumSamples)
 
   GET_BUF
   CHECK_BUF
-  SETUP_IN(8)
+  SETUP_IN(4)
 
   float run     = ZIN0(1);
   float trig     = ZIN0(2);
