@@ -77,7 +77,9 @@ struct RecordST : public Unit
   float **mIn;
   float m_fbufnum;
   SndBuf *m_buf;
-  float m_prevtrig;
+  float m_previnval;
+  double m_phase;
+  double m_lastphase;
 };
 
 static void PlayST_next_k(PlayST *unit, int inNumSamples);
@@ -198,7 +200,10 @@ void RecordST_Ctor(RecordST *unit)
 
   unit->mIn = 0;
   unit->m_writepos = 0;
-  unit->m_prevtrig = 0;
+  unit->m_previnval = 0.f;
+
+  unit->m_phase = 0;
+  unit->m_lastphase = 0;
 
   SETCALC(RecordST_next_k);
 }
@@ -216,25 +221,38 @@ void RecordST_next_k(RecordST *unit, int inNumSamples)
   SETUP_IN(4)
 
   float run     = ZIN0(1);
-  float trig     = ZIN0(2);
-  int writepos = unit->m_writepos;
+  float inval     = *++(in[0]);
+  int32 writepos = unit->m_writepos;
+  double phase = unit->m_phase;
+  double lastphase = unit->m_lastphase;
 
-  writepos++;
+  float* table0 = bufData + writepos;
+  
+//  table0[0] = *++(in[0]);
 
-  if (writepos > 250) {
-    writepos = 0;
-    printf("RecordST: writepos: %i; run: %f;\n", writepos, run);
+
+//  if (writepos > bufSamples) {   
+//    writepos = 0;
+//    printf("RecordST: writepos: %i; run: %f; bufSamples: %i, fbufnum: %f, inval: %f\n", writepos, run, bufSamples, fbufnum, inval);
+//  }
+
+  if (inval != unit->m_previnval) {
+    printf("change\n");
+    
+    table0[0] = inval;
+    table0[1] = phase - lastphase;
+    writepos += 2;
+  
+    printf("RecordST: wrote inval %f length %f to writepos %i", phase, lastphase, writepos);
   }
 
-  if (trig > 0.f && unit->m_prevtrig <= 0.f) {
-    printf("RecordST: Trigger\n");
-  }
-
-  //prevtrig = trig;
+  lastphase = phase;
+  phase += BUFDUR;
 
   unit->m_writepos = writepos;
-  unit->m_prevtrig = trig;
-
+  unit->m_previnval = inval;
+  unit->m_phase = phase;
+  unit->m_lastphase = lastphase;
 }
 
 PluginLoad(PlayST)
