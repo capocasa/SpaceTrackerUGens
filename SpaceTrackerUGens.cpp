@@ -218,7 +218,19 @@ void RecordST_next_k(RecordST *unit, int inNumSamples)
   float run     = ZIN0(1);
   float trig     = ZIN0(2);
   int writepos = unit->m_writepos;
-  int prevtrig = unit->m_prevtrig;
+
+  writepos++;
+
+  if (writepos > 250) {
+    writepos = 0;
+    printf("RecordST: writepos: %i; run: %f;\n", writepos, run);
+  }
+
+  if (trig > 0.f && unit->m_prevtrig <= 0.f) {
+    printf("RecordST: Trigger\n");
+  }
+
+  //prevtrig = trig;
 
   unit->m_writepos = writepos;
   unit->m_prevtrig = trig;
