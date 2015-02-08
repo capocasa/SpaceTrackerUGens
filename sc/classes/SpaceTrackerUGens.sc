@@ -26,7 +26,7 @@ RecordST : UGen {
   */
 	*kr { arg inputArray, bufnum=0, run=1.0, trigger=1.0, doneAction=0;
 		^this.multiNewList(
-			['control', bufnum, run, trigger, doneAction ]
+			['control', bufnum, run, doneAction ]
 			++ inputArray.asArray
 		)
 	}

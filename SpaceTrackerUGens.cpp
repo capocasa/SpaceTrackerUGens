@@ -220,7 +220,7 @@ void RecordST_next_k(RecordST *unit, int inNumSamples)
 
   GET_BUF
   CHECK_BUF
-  SETUP_IN(4)
+  SETUP_IN(3)
 
   float run     = ZIN0(1);
   float inval     = *++(in[0]);
