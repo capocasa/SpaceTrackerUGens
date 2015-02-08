@@ -211,13 +211,12 @@ void RecordST_Dtor(RecordST *unit)
 void RecordST_next_k(RecordST *unit, int inNumSamples)
 {
 
-  float run     = ZIN0(1);
-  float trig     = ZIN0(2);
-
   GET_BUF
   CHECK_BUF
   SETUP_IN(8)
 
+  float run     = ZIN0(1);
+  float trig     = ZIN0(2);
   int writepos = unit->m_writepos;
   int prevtrig = unit->m_prevtrig;
 
