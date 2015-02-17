@@ -165,6 +165,9 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
           next += bufData[index*bufChannels];
           index++;
         }
+        if (next < phase && index < bufFrames) {
+          unit->mDone = false;
+        }
       }
     }
 
@@ -177,6 +180,8 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
         index++;
         next += bufData[index*bufChannels];
         silentFrame = 1;
+      } else {
+        unit->mDone = true;
       }
     }
   }
@@ -187,6 +192,10 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
     } else {
       OUT(i)[0] = 0;
     }
+  }
+  
+  if (unit->mDone) {
+    DoneAction(IN0(5), unit);
   }
 
   unit->m_index = index;
@@ -245,6 +254,11 @@ void RecordST_next_k(RecordST *unit, int inNumSamples)
     table0[1] = phase - lastphase;
     writepos += 2;
   
+    if (writepos > bufSamples) {
+      unit->mDone = true;
+      DoneAction(IN0(2), unit);
+    }
+
     printf("RecordST: wrote inval %f length %f to writepos %i", phase, lastphase, writepos);
   }
 
