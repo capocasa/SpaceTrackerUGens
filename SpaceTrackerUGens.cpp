@@ -243,7 +243,6 @@ void RecordST_next_k(RecordST *unit, int inNumSamples)
   float inval     = *++(in[0]);
   int32 writepos = unit->m_writepos;
   double phase = unit->m_phase;
-  double lastphase = unit->m_lastphase;
 
   float* table0 = bufData + writepos;
   
@@ -258,25 +257,26 @@ void RecordST_next_k(RecordST *unit, int inNumSamples)
   if (inval != unit->m_previnval) {
     printf("change\n");
     
-    table0[0] = inval;
-    table0[1] = phase - lastphase;
+    table0[0] = phase - unit->m_lastphase;
+    table0[1] = inval;
     writepos += 2;
+    
+    printf("RecordST: wrote inval %f at time %f of length %f to writepos %i", inval, phase, phase - unit->m_lastphase, writepos);
+    
+    unit->m_lastphase = phase;
   
     if (writepos > bufSamples) {
       unit->mDone = true;
       DoneAction(IN0(2), unit);
     }
 
-    printf("RecordST: wrote inval %f length %f to writepos %i", phase, lastphase, writepos);
   }
 
-  lastphase = phase;
   phase += BUFDUR;
 
   unit->m_writepos = writepos;
   unit->m_previnval = inval;
   unit->m_phase = phase;
-  unit->m_lastphase = lastphase;
 }
 
 PluginLoad(PlayST)
