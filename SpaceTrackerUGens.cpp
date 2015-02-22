@@ -271,6 +271,7 @@ void RecordST_next_k(RecordST *unit, int inNumSamples)
 //    printf("RecordST: writepos: %i; run: %f; bufSamples: %i, fbufnum: %f, inval: %f\n", writepos, run, bufSamples, fbufnum, inval);
 //  }
 
+  //if (inval > 0.f && unit->m_previnval <= 0.f) {
   if (inval != unit->m_previnval) {
     printf("change\n");
     
