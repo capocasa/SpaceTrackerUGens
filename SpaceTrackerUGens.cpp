@@ -16,11 +16,19 @@ static InterfaceTable *ft;
     ClearUnitOutputs(unit, inNumSamples); \
     return; \
   }
-#define SETUP_IN(offset) \
+
+// Modified SETUP_IN from DelayUGens.cpp
+// Since once channel of the buffer is used to keep track
+// of times, it requires one more channel in the buffer
+// than the number of inputs
+// These needs to be manually kept in sync for new SC versions
+// and the modification added
+
+#define SETUP_IN_ST(offset) \
   uint32 numInputs = unit->mNumInputs - (uint32)offset; \
-  if (numInputs != bufChannels) { \
+  if ((numInputs + 1) != bufChannels) { \
     if(unit->mWorld->mVerbosity > -1 && !unit->mDone){ \
-      Print("buffer-writing UGen channel mismatch: numInputs %i, yet buffer has %i channels\n", numInputs, bufChannels); \
+      Print("RecordST channel mismatch: numInputs %i, yet buffer has %i channels. buffer needs one more channel than numInputs to store time\n", numInputs, bufChannels); \
     } \
     unit->mDone = true; \
     ClearUnitOutputs(unit, inNumSamples); \
@@ -229,7 +237,7 @@ void RecordST_next_k(RecordST *unit, int inNumSamples)
 
   GET_BUF
   CHECK_BUF
-  SETUP_IN(3)
+  SETUP_IN_ST(3)
 
   float run     = ZIN0(1);
   float inval     = *++(in[0]);
