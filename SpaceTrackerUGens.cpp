@@ -273,7 +273,6 @@ void RecordST_next_k(RecordST *unit, int inNumSamples)
 
   //if (inval > 0.f && unit->m_previnval <= 0.f) {
   if (inval != unit->m_previnval) {
-    printf("change\n");
     
     table0[0] = phase - unit->m_lastphase;
     table0[1] = inval;
