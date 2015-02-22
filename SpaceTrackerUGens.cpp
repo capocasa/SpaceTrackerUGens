@@ -214,17 +214,34 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
 
 void RecordST_Ctor(RecordST *unit)
 {
-
+  
+  int inNumSamples = 1;
   unit->mIn = 0;
+
+  GET_BUF
+  CHECK_BUF
+  SETUP_IN_ST(3)
+  
   unit->m_writepos = 0;
-  unit->m_previnval = 0.f;
 
   unit->m_phase = 0;
   unit->m_lastphase = 0;
 
   SETCALC(RecordST_next_k);
-
-  ClearUnitOutputs(unit, 1);
+  
+  float inval = *++(in[0]);
+  float* table0 = bufData;
+  table0[0] = 0;
+  table0[1] = inval;
+  for (uint32 i = 1, j = 2; j < bufChannels; ++i, ++j) {
+    table0[j] = *++(in[i]);
+  }
+  printf("RecordST init: wrote values ");
+  for (uint32 i = 1; i < bufChannels; i++) {
+    printf("%f ", table0[i]);
+  }
+  printf("at time %f to writepos 0\n", unit->m_phase);
+  unit->m_previnval = inval;
 }
   
 void RecordST_Dtor(RecordST *unit)
