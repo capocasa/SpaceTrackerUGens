@@ -48,6 +48,34 @@ static InterfaceTable *ft;
   }
 // end server/plugins/DelayUGens.cpp
 
+// Direct copy from DelayUGens.cpp, update manually
+// Potentially use for looping
+
+/*
+inline double sc_loop(Unit *unit, double in, double hi, int loop)
+{
+  // avoid the divide if possible
+  if (in >= hi) {
+    if (!loop) {
+      unit->mDone = true;
+      return hi;
+    }
+    in -= hi;
+    if (in < hi) return in;
+  } else if (in < 0.) {
+    if (!loop) {
+      unit->mDone = true;
+      return 0.;
+    }
+    in += hi;
+    if (in >= 0.) return in;
+  } else return in;
+
+  return in - hi * floor(in/hi);
+}
+*/
+
+
 // For PlayST
 static inline bool checkBuffer(Unit * unit, const float * bufData, uint32 bufChannels,
                  uint32 expectedChannels, int inNumSamples)
@@ -184,6 +212,7 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
     phase += BUFDUR * rate;
 
     if (phase >= next) {
+      
       if (index < bufFrames) {
         index++;
         next += bufData[index*bufChannels];
@@ -203,7 +232,7 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
   }
   
   if (unit->mDone) {
-    DoneAction(IN0(5), unit);
+    DoneAction(IN0(4), unit);
   }
 
   unit->m_index = index;
