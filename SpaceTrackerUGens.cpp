@@ -185,6 +185,9 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
     if (phase == 0) {
       next = bufData[0];
       index = 0;
+    } elseif (phase < 0) {
+      unit->mDone = true;
+      DoneAction(IN0(4), unit);
     } else {
       if (next > phase) {
         //printf("ST: trackback\n");
@@ -201,9 +204,6 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
           next += bufData[index*bufChannels];
           index++;
         }
-        if (next < phase && index < bufFrames) {
-          unit->mDone = false;
-        }
       }
     }
 
@@ -219,6 +219,7 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
         silentFrame = 1;
       } else {
         unit->mDone = true;
+        DoneAction(IN0(4), unit);
       }
     }
   }
@@ -229,10 +230,6 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
     } else {
       OUT(i)[0] = 0;
     }
-  }
-  
-  if (unit->mDone) {
-    DoneAction(IN0(4), unit);
   }
 
   unit->m_index = index;
