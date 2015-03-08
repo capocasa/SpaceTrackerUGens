@@ -205,7 +205,6 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
     } else {
       if (next > phase) {
         double prevnext;
-        //printf("PlayST: trackback\n");
         while (true) {
           //printf("PlayST: trackback index:%i next:%f phase:%f\n", index, next, phase);
           prevnext = next;
@@ -221,18 +220,19 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
         //printf("PlayST: trackbacked. index:%i next:%f phase:%f\n", index, next, phase);
       } else {
         // if phase==next, do nothing
-        //printf("PlayST: catchup\n");
-        while (next < phase && index < bufFrames) {
+        while (next < phase) {
           //printf("PlayST: catchup index:%i next:%f phase:%f\n", index, next, phase);
-          next += bufData[index*bufChannels];
           index++;
+          if (index >= bufFrames) {
+            done = true;
+            DoneAction(IN0(4), unit);
+            phase = next;
+            index = bufFrames - 1;
+            break;
+          }
+          next += bufData[index*bufChannels];
         }
-        if (index >= bufFrames) {
-          done = true;
-          DoneAction(IN0(4), unit);
-          phase = next;
-          index = bufFrames - 1;
-        }
+        //printf("PlayST: caught up. index:%i next:%f phase:%f\n", index, next, phase);
       }
     }
 
@@ -251,6 +251,7 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
         DoneAction(IN0(4), unit);
         phase = next;
         index = bufFrames - 1;
+        //printf("PlayST: Played to end. index:%i next:%f phase:%f\n", index, next, phase);
       }
     }
   }
