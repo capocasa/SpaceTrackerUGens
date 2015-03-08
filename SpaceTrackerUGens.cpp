@@ -380,9 +380,9 @@ void IndexST_next_k(IndexST *unit, int inNumSamples)
     val = 0, preval = 0;
     for (uint32 index = 0; index < bufFrames; index ++) {
       val += bufData[index*bufChannels];
-      printf("IndexST: val:%f index:%i bufFrames:%i bufChannels:%i\n", val, index, bufFrames, bufChannels);
+//      printf("IndexST: val:%f index:%i bufFrames:%i bufChannels:%i\n", val, index, bufFrames, bufChannels);
       if (val > startPos) {
-        printf("IndexST: break at preval %f\n", preval);
+//        printf("IndexST: break at preval %f\n", preval);
         break;
       }
       preval = val;
