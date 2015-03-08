@@ -32,3 +32,9 @@ RecordST : UGen {
 	}
 }
 
+IndexST : UGen {
+	*kr { arg bufnum=0, trigger=1.0, startPos=0.0;
+		^this.multiNew('control', bufnum, trigger, startPos)
+	}
+}
+

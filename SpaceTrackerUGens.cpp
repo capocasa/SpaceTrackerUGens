@@ -118,11 +118,22 @@ struct RecordST : public Unit
   double m_lastphase;
 };
 
+struct IndexST : public Unit
+{
+  float m_fbufnum;
+  SndBuf *m_buf;
+  float m_prevtrig;
+  double m_val;
+};
+
 static void PlayST_next_k(PlayST *unit, int inNumSamples);
 static void PlayST_Ctor(PlayST* unit);
 
 static void RecordST_next_k(RecordST *unit, int inNumSamples);
 static void RecordST_Ctor(RecordST *unit);
+
+static void IndexST_next_k(IndexST *unit, int inNumSamples);
+static void IndexST_Ctor(IndexST* unit);
 
 void PlayST_Ctor(PlayST* unit)
 {
@@ -185,7 +196,7 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
     if (phase == 0) {
       next = bufData[0];
       index = 0;
-    } elseif (phase < 0) {
+    } else if (phase < 0) {
       unit->mDone = true;
       DoneAction(IN0(4), unit);
     } else {
@@ -237,6 +248,7 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
   unit->m_next = next;
   unit->m_prevtrig = trig;
 }
+
 
 void RecordST_Ctor(RecordST *unit)
 {
@@ -335,9 +347,60 @@ void RecordST_next_k(RecordST *unit, int inNumSamples)
   unit->m_phase = phase;
 }
 
+void IndexST_Ctor(IndexST* unit)
+{
+  SETCALC(IndexST_next_k);
+  
+  GET_BUF_SHARED
+  if (!checkBuffer(unit, bufData, bufChannels, unit->mNumOutputs, 1))
+    return;
+
+  unit->m_fbufnum = -1e9f;
+  unit->m_val = 0;
+
+  IndexST_next_k(unit, 1);
+}
+
+void IndexST_next_k(IndexST *unit, int inNumSamples)
+{
+  float trig     = ZIN0(1);
+  float startPos     = ZIN0(2);
+
+  GET_BUF_SHARED
+  
+  int numOutputs = unit->mNumOutputs;
+  if (!checkBuffer(unit, bufData, bufChannels, numOutputs, inNumSamples))
+    return;
+
+  double val = unit->m_val;
+
+  double preval = val;
+
+  if (trig > 0.f && unit->m_prevtrig <= 0.f) {
+    val = 0, preval = 0;
+    for (uint32 index = 0; index < bufFrames; index ++) {
+      val += bufData[index*bufChannels];
+      printf("IndexST: val:%f index:%i bufFrames:%i bufChannels:%i\n", val, index, bufFrames, bufChannels);
+      if (val >= startPos) {
+        printf("IndexST: break at preval %f", preval);
+        break;
+      }
+      preval = val;
+    }
+    val = preval;
+  }
+
+  OUT(0)[0] = val;
+
+  unit->m_val = val;
+  unit->m_prevtrig = trig;
+}
+
+
 PluginLoad(PlayST)
 {
     ft = inTable;
+    DefineSimpleUnit(IndexST);
     DefineSimpleUnit(PlayST);
     DefineDtorUnit(RecordST);
 }
