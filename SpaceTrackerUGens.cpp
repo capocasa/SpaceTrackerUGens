@@ -181,44 +181,62 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
 
   int silentFrame = 0;
 
+  int done = unit->mDone;
+
   //if (index < bufFrames) printf("ST: index:%i bufnum:%i bufChannels:%i BUFDUR:%f phase:%f next:%f time:%f note:%f value:%f\n", index, (int) unit->m_fbufnum, bufChannels, BUFDUR, phase, next, frame[0], frame[1], frame[2]);
 
   if (trig > 0.f && unit->m_prevtrig <= 0.f) {
 
+    //printf("PlayST: phase:%f next:%f time:%f note:%f value:%f\n", phase, next, frame[0], frame[1], frame[2]);
+    
     phase = ZIN0(3);
     
 //    printf("ST: buffer dump ");
 //    for (int i = 0; i < (bufFrames * bufChannels); i++) {
 //      printf("%f ", bufData[i]);
 //    }
-//    printf("phase:%f next:%f time:%f note:%f value:%f\n", phase, next, frame[0], frame[1], frame[2]);
 
-    if (phase == 0) {
+    done = false;
+    
+    if (phase <= 0) {
       next = bufData[0];
       index = 0;
-    } else if (phase < 0) {
-      unit->mDone = true;
-      DoneAction(IN0(4), unit);
+      phase = 0;
     } else {
       if (next > phase) {
-        //printf("ST: trackback\n");
-        while (next > phase && index > 0) {
-          //printf("ST: trackback index:%i next:%f phase:%f\n", index, next, phase);
-          index--;
+        double prevnext;
+        //printf("PlayST: trackback\n");
+        while (true) {
+          //printf("PlayST: trackback index:%i next:%f phase:%f\n", index, next, phase);
+          prevnext = next;
           next -= bufData[index*bufChannels];
+          
+          if (next <= phase) {
+            next = prevnext;
+            break;
+          }
+
+          index--;
         }
+        //printf("PlayST: trackbacked. index:%i next:%f phase:%f\n", index, next, phase);
       } else {
         // if phase==next, do nothing
-        //printf("ST: catchup\n");
+        //printf("PlayST: catchup\n");
         while (next < phase && index < bufFrames) {
-          //printf("ST: catchup index:%i next:%f phase:%f\n", index, next, phase);
+          //printf("PlayST: catchup index:%i next:%f phase:%f\n", index, next, phase);
           next += bufData[index*bufChannels];
           index++;
+        }
+        if (index >= bufFrames) {
+          done = true;
+          DoneAction(IN0(4), unit);
+          phase = next;
+          index = bufFrames - 1;
         }
       }
     }
 
-  } else {
+  } else if (done == false) {
 
     phase += BUFDUR * rate;
 
@@ -229,20 +247,23 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
         next += bufData[index*bufChannels];
         silentFrame = 1;
       } else {
-        unit->mDone = true;
+        done = true;
         DoneAction(IN0(4), unit);
+        phase = next;
+        index = bufFrames - 1;
       }
     }
   }
   
   for (int i = 0, j = 1; j < bufChannels; i++, j++) {
-    if (rate > 0 && silentFrame == 0) {
+    if (rate > 0 && silentFrame == 0 && done == false) {
       OUT(i)[0] = frame[j];
     } else {
       OUT(i)[0] = 0;
     }
   }
 
+  unit->mDone = done;
   unit->m_index = index;
   unit->m_phase = phase;
   unit->m_next = next;
