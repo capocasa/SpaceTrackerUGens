@@ -76,17 +76,20 @@ inline double sc_loop(Unit *unit, double in, double hi, int loop)
 */
 
 
-// For PlayST
-static inline bool checkBuffer(Unit * unit, const float * bufData, uint32 bufChannels,
-                 uint32 expectedChannels, int inNumSamples)
+// Copied from DelayUGens.cpp and modified
+// Must be manually kept in sync and adapted
+// to ST channel numbers
+// (ST has one less output than buffer channels, because the first
+//  channel of the buffer is for times)
+static inline bool checkBufferST(Unit * unit, const float * bufData, uint32 bufChannels,
+                 uint32 numOutputs, int inNumSamples)
 {
   if (!bufData)
     goto handle_failure;
 
-  if (expectedChannels > bufChannels) {
+  if (numOutputs + 1 != bufChannels) {
     if(unit->mWorld->mVerbosity > -1 && !unit->mDone)
-      Print("Buffer UGen channel mismatch: expected %i, yet buffer has %i channels\n",
-          expectedChannels, bufChannels);
+      Print("ST UGen channel mismatch: numOutputs %i, yet buffer has %i channels. buffer needs one more channel than numInputs to store time\n", numOutputs, bufChannels);
     goto handle_failure;
   }
   return true;
@@ -140,7 +143,7 @@ void PlayST_Ctor(PlayST* unit)
   SETCALC(PlayST_next_k);
   
   GET_BUF_SHARED
-  if (!checkBuffer(unit, bufData, bufChannels, unit->mNumOutputs, 1))
+  if (!checkBufferST(unit, bufData, bufChannels, unit->mNumOutputs, 1))
     return;
 
   unit->m_fbufnum = -1e9f;
@@ -170,7 +173,7 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
   GET_BUF_SHARED
   
   int numOutputs = unit->mNumOutputs;
-  if (!checkBuffer(unit, bufData, bufChannels, numOutputs, inNumSamples))
+  if (!checkBufferST(unit, bufData, bufChannels, numOutputs, inNumSamples))
     return;
 
   double phase = unit->m_phase;
@@ -374,8 +377,8 @@ void IndexST_Ctor(IndexST* unit)
   SETCALC(IndexST_next_k);
   
   GET_BUF_SHARED
-  if (!checkBuffer(unit, bufData, bufChannels, unit->mNumOutputs, 1))
-    return;
+
+  // no need for checkBufferST, only uses first channel, only outputs one channel
 
   unit->m_fbufnum = -1e9f;
   unit->m_val = 0;
@@ -389,10 +392,8 @@ void IndexST_next_k(IndexST *unit, int inNumSamples)
   float startPos     = ZIN0(2);
 
   GET_BUF_SHARED
-  
-  int numOutputs = unit->mNumOutputs;
-  if (!checkBuffer(unit, bufData, bufChannels, numOutputs, inNumSamples))
-    return;
+
+  // no need for checkBufferST, only uses first channel, only outputs one channel
 
   double val = unit->m_val;
 
