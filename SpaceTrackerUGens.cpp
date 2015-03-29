@@ -359,7 +359,7 @@ void RecordST_next_k(RecordST *unit, int inNumSamples)
       // Write time into last note
       table0[0] = phase - unit->m_lastphase;
 
-      printf("RecordST: wrote time %f to writepos %i. ", table0[0], writepos);
+//      printf("RecordST: wrote time %f to writepos %i. ", table0[0], writepos);
 
       // Shift to next note and write values, time will be written at next invalger
       writepos += bufChannels;
@@ -374,11 +374,11 @@ void RecordST_next_k(RecordST *unit, int inNumSamples)
           table0[j] = *++(in[i]);
         }
 
-        printf("wrote values ");
-        for (uint32 i = 1; i < bufChannels; i++) {
-          printf("%f ", table0[i]);
-        }
-        printf("at time %f to writepos %i\n", phase, writepos);
+//        printf("wrote values ");
+//        for (uint32 i = 1; i < bufChannels; i++) {
+//          printf("%f ", table0[i]);
+//        }
+//        printf("at time %f to writepos %i\n", phase, writepos);
 
         unit->m_lastphase = phase; 
       }
