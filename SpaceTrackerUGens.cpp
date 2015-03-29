@@ -142,14 +142,14 @@ void PlayST_Ctor(PlayST* unit)
 {
   SETCALC(PlayST_next_k);
   
-  GET_BUF_SHARED
-  if (!checkBufferST(unit, bufData, bufChannels, unit->mNumOutputs, 1))
-    return;
+  //GET_BUF_SHARED
+  //if (!checkBufferST(unit, bufData, bufChannels, unit->mNumOutputs, 1))
+  //  return;
 
   unit->m_fbufnum = -1e9f;
   unit->m_phase = 0; 
-  //unit->m_next = 0;
-  unit->m_next = buf->data[0];
+  unit->m_next = -1;
+  //unit->m_next = buf->data[0];
   unit->m_index = 0;
 
 //  int bufChannels = buf->channels;
@@ -187,6 +187,14 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
   int done = unit->mDone;
 
   //if (index < bufFrames) printf("ST: index:%i bufnum:%i bufChannels:%i BUFDUR:%f phase:%f next:%f time:%f note:%f value:%f\n", index, (int) unit->m_fbufnum, bufChannels, BUFDUR, phase, next, frame[0], frame[1], frame[2]);
+
+  if (next < 0) {
+    next = bufData[0];
+    // TODO: find a more elegant way to initialize next.
+    // it was formerly done by initializing the buffer in
+    // the constructor but this causes server crashes when
+    // starting a synth with a hardcoded uninitialized buffer object
+  }
 
   if (trig > 0.f && unit->m_prevtrig <= 0.f) {
 
@@ -278,33 +286,20 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
 void RecordST_Ctor(RecordST *unit)
 {
   
-  int inNumSamples = 1;
+  unit->m_fbufnum = -1e9f;
   unit->mIn = 0;
-
-  GET_BUF
-  CHECK_BUF
-  SETUP_IN_ST(3)
   
-  unit->m_writepos = 0;
+  unit->m_writepos = -1;
+  unit->m_previnval = -1;
 
   unit->m_phase = 0;
   unit->m_lastphase = 0;
 
   SETCALC(RecordST_next_k);
-  
-  float inval = *++(in[0]);
-  float* table0 = bufData;
-  table0[0] = 0;
-  table0[1] = inval;
-  for (uint32 i = 1, j = 2; j < bufChannels; ++i, ++j) {
-    table0[j] = *++(in[i]);
-  }
-  printf("RecordST init: wrote values ");
-  for (uint32 i = 1; i < bufChannels; i++) {
-    printf("%f ", table0[i]);
-  }
-  printf("at time %f to writepos 0\n", unit->m_phase);
-  unit->m_previnval = inval;
+
+  //printf("RecordST_Ctor\n");
+
+  ClearUnitOutputs(unit, 1);
 }
   
 void RecordST_Dtor(RecordST *unit)
@@ -324,8 +319,29 @@ void RecordST_next_k(RecordST *unit, int inNumSamples)
   int32 writepos = unit->m_writepos;
   double phase = unit->m_phase;
 
-  float* table0 = bufData + writepos;
+  float* table0;
   
+  if (writepos < 0) {
+    // TODO: find more elegant way to initialize buffer
+    // see todo mark in PlayST for reasoning
+    
+    writepos = 0;
+    table0 = bufData;
+    table0[0] = 0;
+    table0[1] = inval;
+    for (uint32 i = 1, j = 2; j < bufChannels; ++i, ++j) {
+      table0[j] = *++(in[i]);
+    }
+    unit->m_previnval = inval;
+    //printf("RecordST init: wrote values ");
+    //for (uint32 i = 1; i < bufChannels; i++) {
+    //  printf("%f ", table0[i]);
+    //}
+    //printf("at time %f to writepos 0\n", unit->m_phase);
+  } else {
+    table0 = bufData + writepos;
+  }
+
 //  table0[0] = *++(in[0]);
 
 
