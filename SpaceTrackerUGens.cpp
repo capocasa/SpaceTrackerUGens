@@ -391,8 +391,6 @@ void RecordST_next_k(RecordST *unit, int inNumSamples)
 void IndexST_Ctor(IndexST* unit)
 {
   SETCALC(IndexST_next_k);
-  
-  GET_BUF_SHARED
 
   // no need for checkBufferST, only uses first channel, only outputs one channel
 
