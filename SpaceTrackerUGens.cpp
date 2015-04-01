@@ -34,6 +34,7 @@ static InterfaceTable *ft;
     ClearUnitOutputs(unit, inNumSamples); \
     return; \
   } \
+/*
   if(!unit->mIn){ \
     unit->mIn = (float**)RTAlloc(unit->mWorld, numInputs * sizeof(float*)); \
     if (unit->mIn == NULL) { \
@@ -46,6 +47,7 @@ static InterfaceTable *ft;
   for (uint32 i=0; i<numInputs; ++i) { \
     in[i] = ZIN(i+offset); \
   }
+*/
 // end server/plugins/DelayUGens.cpp
 
 // Direct copy from DelayUGens.cpp, update manually
@@ -304,7 +306,7 @@ void RecordST_Ctor(RecordST *unit)
   
 void RecordST_Dtor(RecordST *unit)
 {
-  TAKEDOWN_IN
+  //TAKEDOWN_IN
 }
 
 void RecordST_next_k(RecordST *unit, int inNumSamples)
@@ -318,9 +320,9 @@ void RecordST_next_k(RecordST *unit, int inNumSamples)
   GET_BUF
   CHECK_BUF
   SETUP_IN_ST(3)
-
+  
   float run     = ZIN0(1);
-  float inval     = *++(in[0]);
+  float inval     = ZIN0(3);
   int32 writepos = unit->m_writepos;
   double phase = unit->m_phase;
 
@@ -359,7 +361,7 @@ void RecordST_next_k(RecordST *unit, int inNumSamples)
         table0 = bufData + writepos;
         table0[1] = inval;
         for (uint32 i = 1, j = 2; j < bufChannels; ++i, ++j) {
-          table0[j] = *++(in[i]);
+          table0[j] = ZIN0(3+i);
         }
 
 //        printf("wrote values ");
