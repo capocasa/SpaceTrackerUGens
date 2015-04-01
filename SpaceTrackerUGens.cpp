@@ -310,6 +310,11 @@ void RecordST_Dtor(RecordST *unit)
 void RecordST_next_k(RecordST *unit, int inNumSamples)
 {
 
+  if (unit->mDone) {
+    return;
+    // TODO: find out why RecordBuf doesn't need this
+  }
+
   GET_BUF
   CHECK_BUF
   SETUP_IN_ST(3)
