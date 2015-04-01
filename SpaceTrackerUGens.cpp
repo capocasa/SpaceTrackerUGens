@@ -289,8 +289,8 @@ void RecordST_Ctor(RecordST *unit)
   unit->m_fbufnum = -1e9f;
   unit->mIn = 0;
   
-  unit->m_writepos = -1;
-  unit->m_previnval = -1;
+  unit->m_writepos = 0;
+  unit->m_previnval = -8388608; // something that can't be inval
 
   unit->m_phase = 0;
   unit->m_lastphase = 0;
@@ -319,29 +319,9 @@ void RecordST_next_k(RecordST *unit, int inNumSamples)
   int32 writepos = unit->m_writepos;
   double phase = unit->m_phase;
 
-  float* table0;
-  
-  if (writepos < 0) {
-    // TODO: find more elegant way to initialize buffer
-    // see todo mark in PlayST for reasoning
-    
-    writepos = 0;
-    table0 = bufData;
-    table0[0] = 0;
-    table0[1] = inval;
-    for (uint32 i = 1, j = 2; j < bufChannels; ++i, ++j) {
-      table0[j] = *++(in[i]);
-    }
-    unit->m_previnval = inval;
-    //printf("RecordST init: wrote values ");
-    //for (uint32 i = 1; i < bufChannels; i++) {
-    //  printf("%f ", table0[i]);
-    //}
-    //printf("at time %f to writepos 0\n", unit->m_phase);
-  } else {
-    table0 = bufData + writepos;
-  }
 
+  float* table0 = bufData + writepos;
+  
 //  table0[0] = *++(in[0]);
 
 
@@ -351,11 +331,14 @@ void RecordST_next_k(RecordST *unit, int inNumSamples)
 //  }
 
   //if (inval > 0.f && unit->m_previnval <= 0.f) {
+  
 
   if (run > 0.f) {
 
-    if (inval != unit->m_previnval) {
-      
+    //if (abs(inval - unit->m_previnval) > 0.f) {
+    if (abs(inval - unit->m_previnval) > 0.f) {
+    
+
       // Write time into last note
       table0[0] = phase - unit->m_lastphase;
 
