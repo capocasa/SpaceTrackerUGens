@@ -373,6 +373,8 @@ void RecordST_next_k(RecordST *unit, int inNumSamples)
     }
 
     phase += BUFDUR;
+    
+    OUT(0)[0] = writepos;
 
   }
 
