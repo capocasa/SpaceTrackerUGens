@@ -180,7 +180,7 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
   double next = unit->m_next;
   uint32 index = unit->m_index;
 
-  const float* frame = bufData + index * bufChannels;
+  const float* frame;
 
   int silentFrame = 0;
 
@@ -248,7 +248,7 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
     }
 
   } else if (done == false) {
-
+    
     phase += BUFDUR * rate;
 
     if (phase >= next) {
@@ -266,6 +266,8 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
       }
     }
   }
+  
+  frame = bufData + index * bufChannels;
   
   for (int i = 0, j = 1; j < bufChannels; i++, j++) {
     if (rate > 0 && silentFrame == 0 && done == false) {
