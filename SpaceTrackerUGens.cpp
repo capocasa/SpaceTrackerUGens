@@ -188,11 +188,9 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
 
   if (trig > 0.f && unit->m_prevtrig <= 0.f) {
 
-    printf("PlayST: triggered. phase:%f next:%f time:%f note:%f value:%f\n", phase, next, frame[0], frame[1], frame[2]);
-    
     phase = ZIN0(3);
     
-    printf("PlayST: triggered. phase:%f next:%f time:%f bufnum:%f note:%f value:%f\n", phase, next, unit->m_fbufnum, frame[0], frame[1], frame[2]);
+    //printf("PlayST: triggered. phase:%f next:%f time:%f bufnum:%f note:%f value:%f\n", phase, next, unit->m_fbufnum, frame[0], frame[1], frame[2]);
     
 //    printf("ST: buffer dump ");
 //    for (int i = 0; i < (bufFrames * bufChannels); i++) {
