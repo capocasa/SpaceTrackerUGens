@@ -106,6 +106,7 @@ struct PlayST : public Unit
   float m_fbufnum;
   uint32 m_index;
   double m_next;
+  int m_first;
   SndBuf *m_buf;
   float m_prevtrig;
 };
@@ -151,6 +152,7 @@ void PlayST_Ctor(PlayST* unit)
   unit->m_next = -1;
   //unit->m_next = buf->data[0];
   unit->m_index = 0;
+  unit->m_first = true;
 
 //  int bufChannels = buf->channels;
 //  const float* bufData = buf->data;
@@ -179,6 +181,7 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
   double phase = unit->m_phase;
   double next = unit->m_next;
   uint32 index = unit->m_index;
+  int first = unit->m_first;
 
   const float* frame;
 
@@ -188,17 +191,19 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
 
   //if (index < bufFrames) printf("ST: index:%i bufnum:%i bufChannels:%i BUFDUR:%f phase:%f next:%f time:%f note:%f value:%f\n", index, (int) unit->m_fbufnum, bufChannels, BUFDUR, phase, next, frame[0], frame[1], frame[2]);
 
-  if (next < 0) {
+  if (first) {
     next = bufData[0];
     // TODO: find a more elegant way to initialize next.
     // it was formerly done by initializing the buffer in
     // the constructor but this causes server crashes when
     // starting a synth with a hardcoded uninitialized buffer object
+    unit->m_first = 0;
+    printf("PlayST: initialized. rate:%f phase:%f next: %f\n", rate, phase, next);
   }
 
   if (trig > 0.f && unit->m_prevtrig <= 0.f) {
 
-    //printf("PlayST: phase:%f next:%f time:%f note:%f value:%f\n", phase, next, frame[0], frame[1], frame[2]);
+    printf("PlayST: triggered. phase:%f next:%f time:%f note:%f value:%f\n", phase, next, frame[0], frame[1], frame[2]);
     
     phase = ZIN0(3);
     
@@ -213,6 +218,9 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
       next = bufData[0];
       index = 0;
       phase = 0;
+      if (next == 0) {
+        next = 9999999;
+      }
     } else {
       if (next > phase) {
         double prevnext;
@@ -248,9 +256,8 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
     }
 
   } else if (done == false) {
-    
-    phase += BUFDUR * rate;
 
+    phase += BUFDUR * rate;
     if (phase >= next) {
       
       if (index < bufFrames) {
@@ -265,10 +272,15 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
         //printf("PlayST: Played to end. index:%i next:%f phase:%f\n", index, next, phase);
       }
     }
+    
   }
   
   frame = bufData + index * bufChannels;
   
+  if (silentFrame) {
+    //printf("PlayST: silent frame. note: %f\n", frame[1]);
+  }
+
   for (int i = 0, j = 1; j < bufChannels; i++, j++) {
     if (rate > 0 && silentFrame == 0 && done == false) {
       OUT(i)[0] = frame[j];
