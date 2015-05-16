@@ -142,10 +142,6 @@ static void IndexST_Ctor(IndexST* unit);
 void PlayST_Ctor(PlayST* unit)
 {
   SETCALC(PlayST_next_k);
-  
-  //GET_BUF_SHARED
-  //if (!checkBufferST(unit, bufData, bufChannels, unit->mNumOutputs, 1))
-  //  return;
 
   unit->m_fbufnum = -1e9f;
   unit->m_prevbufnum = -1e9f;
@@ -154,13 +150,6 @@ void PlayST_Ctor(PlayST* unit)
   unit->m_index = 0;
 
   PlayST_next_k(unit, 1);
-
-//  ClearUnitOutputs(unit, 1);
-
-//  for (int i = 0, j = 1; j != bufChannels; i++, j++) {
-//    OUT(0)[i] = bufData[j];
-//  }
-
 }
 
 void PlayST_next_k(PlayST *unit, int inNumSamples)
