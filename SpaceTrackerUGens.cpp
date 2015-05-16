@@ -106,9 +106,9 @@ struct PlayST : public Unit
   float m_fbufnum;
   uint32 m_index;
   double m_next;
-  int m_first;
   SndBuf *m_buf;
   float m_prevtrig;
+  float m_prevbufnum;
 };
 
 struct RecordST : public Unit
@@ -148,14 +148,10 @@ void PlayST_Ctor(PlayST* unit)
   //  return;
 
   unit->m_fbufnum = -1e9f;
+  unit->m_prevbufnum = -1e9f;
   unit->m_phase = 0; 
-  unit->m_next = -1;
-  //unit->m_next = buf->data[0];
+  unit->m_next = 0;
   unit->m_index = 0;
-  unit->m_first = true;
-
-//  int bufChannels = buf->channels;
-//  const float* bufData = buf->data;
 
   PlayST_next_k(unit, 1);
 
@@ -181,7 +177,8 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
   double phase = unit->m_phase;
   double next = unit->m_next;
   uint32 index = unit->m_index;
-  int first = unit->m_first;
+  float bufnum = unit->m_fbufnum;
+  float prevbufnum = unit->m_prevbufnum;
 
   const float* frame;
 
@@ -191,21 +188,22 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
 
   //if (index < bufFrames) printf("ST: index:%i bufnum:%i bufChannels:%i BUFDUR:%f phase:%f next:%f time:%f note:%f value:%f\n", index, (int) unit->m_fbufnum, bufChannels, BUFDUR, phase, next, frame[0], frame[1], frame[2]);
 
-  if (first) {
+  if (prevbufnum != bufnum) {
     next = bufData[0];
-    // TODO: find a more elegant way to initialize next.
-    // it was formerly done by initializing the buffer in
-    // the constructor but this causes server crashes when
-    // starting a synth with a hardcoded uninitialized buffer object
-    unit->m_first = 0;
-    printf("PlayST: initialized. rate:%f phase:%f next: %f\n", rate, phase, next);
+    if (next == 0) {
+      next = 16777215;
+    }
+    //printf("PlayST: initialized. rate:%f phase:%f next: %f\n bufnum:%f prevbufnum:%f", rate, phase, next, bufnum, prevbufnum);
   }
+  unit->m_prevbufnum = bufnum;
 
   if (trig > 0.f && unit->m_prevtrig <= 0.f) {
 
     printf("PlayST: triggered. phase:%f next:%f time:%f note:%f value:%f\n", phase, next, frame[0], frame[1], frame[2]);
     
     phase = ZIN0(3);
+    
+    printf("PlayST: triggered. phase:%f next:%f time:%f bufnum:%f note:%f value:%f\n", phase, next, unit->m_fbufnum, frame[0], frame[1], frame[2]);
     
 //    printf("ST: buffer dump ");
 //    for (int i = 0; i < (bufFrames * bufChannels); i++) {
@@ -219,7 +217,7 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
       index = 0;
       phase = 0;
       if (next == 0) {
-        next = 9999999;
+        next = 16777215;
       }
     } else {
       if (next > phase) {
