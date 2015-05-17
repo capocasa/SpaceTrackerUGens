@@ -182,7 +182,7 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
     if (next == 0) {
       next = 16777215;
     }
-    //printf("PlayST: initialized. rate:%f phase:%f next: %f\n bufnum:%f prevbufnum:%f", rate, phase, next, bufnum, prevbufnum);
+    //printf("PlayST: initialized. rate:%f phase:%f next: %f\n bufnum:%f prevbufnum:%f\n", rate, phase, next, bufnum, prevbufnum);
   }
   unit->m_prevbufnum = bufnum;
 
