@@ -289,7 +289,7 @@ void RecordBufS_Ctor(RecordBufS *unit)
   unit->mIn = 0;
   
   unit->m_writepos = 0;
-  unit->m_previnval = -8388608; // something that can't be inval
+  unit->m_previnval = 0;
 
   unit->m_phase = 0;
   unit->m_lastphase = 0;
