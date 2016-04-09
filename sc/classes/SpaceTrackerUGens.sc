@@ -1,4 +1,4 @@
-PlayST : MultiOutUGen {
+PlayBufS : MultiOutUGen {
 
   *ar {
     thisMethod.notYetImplemented;
@@ -15,7 +15,7 @@ PlayST : MultiOutUGen {
 	argNamesInputsOffset { ^2 }
 }
 
-RecordST : UGen {
+RecordBufS : UGen {
   *ar {
     thisMethod.notYetImplemented;
   }
@@ -27,7 +27,7 @@ RecordST : UGen {
 	}
 }
 
-IndexST : UGen {
+PlayBufSIndex : UGen {
   *ar {
     thisMethod.notYetImplemented;
   }
