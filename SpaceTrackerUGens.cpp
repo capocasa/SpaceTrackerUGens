@@ -2,7 +2,7 @@
 
 static InterfaceTable *ft;
 
-// For RecordST
+// For RecordBufS
 // from server/plugins/DelayUGens.cpp
 // keep in sync manually
 #define TAKEDOWN_IN \
@@ -28,7 +28,7 @@ static InterfaceTable *ft;
   uint32 numInputs = unit->mNumInputs - (uint32)offset; \
   if ((numInputs + 1) != bufChannels) { \
     if(unit->mWorld->mVerbosity > -1 && !unit->mDone){ \
-      Print("RecordST channel mismatch: numInputs %i, yet buffer has %i channels. buffer needs one more channel than numInputs to store time\n", numInputs, bufChannels); \
+      Print("RecordBufS channel mismatch: numInputs %i, yet buffer has %i channels. buffer needs one more channel than numInputs to store time\n", numInputs, bufChannels); \
     } \
     unit->mDone = true; \
     ClearUnitOutputs(unit, inNumSamples); \
@@ -100,7 +100,7 @@ handle_failure:
   return false;
 }
 
-struct PlayST : public Unit
+struct PlayBufS : public Unit
 {
   double m_phase;
   float m_fbufnum;
@@ -111,7 +111,7 @@ struct PlayST : public Unit
   float m_prevbufnum;
 };
 
-struct RecordST : public Unit
+struct RecordBufS : public Unit
 {
   int32 m_writepos;
   float **mIn;
@@ -122,7 +122,7 @@ struct RecordST : public Unit
   double m_lastphase;
 };
 
-struct IndexST : public Unit
+struct PlayBufSIndex : public Unit
 {
   float m_fbufnum;
   SndBuf *m_buf;
@@ -130,18 +130,18 @@ struct IndexST : public Unit
   double m_val;
 };
 
-static void PlayST_next_k(PlayST *unit, int inNumSamples);
-static void PlayST_Ctor(PlayST* unit);
+static void PlayBufS_next_k(PlayBufS *unit, int inNumSamples);
+static void PlayBufS_Ctor(PlayBufS* unit);
 
-static void RecordST_next_k(RecordST *unit, int inNumSamples);
-static void RecordST_Ctor(RecordST *unit);
+static void RecordBufS_next_k(RecordBufS *unit, int inNumSamples);
+static void RecordBufS_Ctor(RecordBufS *unit);
 
-static void IndexST_next_k(IndexST *unit, int inNumSamples);
-static void IndexST_Ctor(IndexST* unit);
+static void PlayBufSIndex_next_k(PlayBufSIndex *unit, int inNumSamples);
+static void PlayBufSIndex_Ctor(PlayBufSIndex* unit);
 
-void PlayST_Ctor(PlayST* unit)
+void PlayBufS_Ctor(PlayBufS* unit)
 {
-  SETCALC(PlayST_next_k);
+  SETCALC(PlayBufS_next_k);
 
   unit->m_fbufnum = -1e9f;
   unit->m_prevbufnum = -1e9f;
@@ -149,10 +149,10 @@ void PlayST_Ctor(PlayST* unit)
   unit->m_next = 0;
   unit->m_index = 0;
 
-  PlayST_next_k(unit, 1);
+  PlayBufS_next_k(unit, 1);
 }
 
-void PlayST_next_k(PlayST *unit, int inNumSamples)
+void PlayBufS_next_k(PlayBufS *unit, int inNumSamples)
 {
   float rate     = ZIN0(1);
   float trig     = ZIN0(2);
@@ -182,7 +182,7 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
     if (next == 0) {
       next = 16777215;
     }
-    //printf("PlayST: initialized. rate:%f phase:%f next: %f\n bufnum:%f prevbufnum:%f\n", rate, phase, next, bufnum, prevbufnum);
+    //printf("PlayBufS: initialized. rate:%f phase:%f next: %f\n bufnum:%f prevbufnum:%f\n", rate, phase, next, bufnum, prevbufnum);
   }
   unit->m_prevbufnum = bufnum;
 
@@ -190,7 +190,7 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
 
     phase = ZIN0(3);
     
-    //printf("PlayST: triggered. phase:%f next:%f time:%f bufnum:%f note:%f value:%f\n", phase, next, unit->m_fbufnum, frame[0], frame[1], frame[2]);
+    //printf("PlayBufS: triggered. phase:%f next:%f time:%f bufnum:%f note:%f value:%f\n", phase, next, unit->m_fbufnum, frame[0], frame[1], frame[2]);
     
 //    printf("ST: buffer dump ");
 //    for (int i = 0; i < (bufFrames * bufChannels); i++) {
@@ -210,7 +210,7 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
       if (next > phase) {
         double prevnext;
         while (true) {
-          //printf("PlayST: trackback index:%i next:%f phase:%f\n", index, next, phase);
+          //printf("PlayBufS: trackback index:%i next:%f phase:%f\n", index, next, phase);
           prevnext = next;
           next -= bufData[index*bufChannels];
           
@@ -221,11 +221,11 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
 
           index--;
         }
-        //printf("PlayST: trackbacked. index:%i next:%f phase:%f\n", index, next, phase);
+        //printf("PlayBufS: trackbacked. index:%i next:%f phase:%f\n", index, next, phase);
       } else {
         // if phase==next, do nothing
         while (next < phase) {
-          //printf("PlayST: catchup index:%i next:%f phase:%f\n", index, next, phase);
+          //printf("PlayBufS: catchup index:%i next:%f phase:%f\n", index, next, phase);
           index++;
           if (index >= bufFrames) {
             done = true;
@@ -236,7 +236,7 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
           }
           next += bufData[index*bufChannels];
         }
-        //printf("PlayST: caught up. index:%i next:%f phase:%f\n", index, next, phase);
+        //printf("PlayBufS: caught up. index:%i next:%f phase:%f\n", index, next, phase);
       }
     }
 
@@ -254,7 +254,7 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
         DoneAction(IN0(4), unit);
         phase = next;
         index = bufFrames - 1;
-        //printf("PlayST: Played to end. index:%i next:%f phase:%f\n", index, next, phase);
+        //printf("PlayBufS: Played to end. index:%i next:%f phase:%f\n", index, next, phase);
       }
     }
     
@@ -263,7 +263,7 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
   frame = bufData + index * bufChannels;
   
   if (silentFrame) {
-    //printf("PlayST: silent frame. note: %f\n", frame[1]);
+    //printf("PlayBufS: silent frame. note: %f\n", frame[1]);
   }
 
   for (int i = 0, j = 1; j < bufChannels; i++, j++) {
@@ -282,7 +282,7 @@ void PlayST_next_k(PlayST *unit, int inNumSamples)
 }
 
 
-void RecordST_Ctor(RecordST *unit)
+void RecordBufS_Ctor(RecordBufS *unit)
 {
   
   unit->m_fbufnum = -1e9f;
@@ -294,19 +294,19 @@ void RecordST_Ctor(RecordST *unit)
   unit->m_phase = 0;
   unit->m_lastphase = 0;
 
-  SETCALC(RecordST_next_k);
+  SETCALC(RecordBufS_next_k);
 
-  //printf("RecordST_Ctor\n");
+  //printf("RecordBufS_Ctor\n");
 
   ClearUnitOutputs(unit, 1);
 }
   
-void RecordST_Dtor(RecordST *unit)
+void RecordBufS_Dtor(RecordBufS *unit)
 {
   TAKEDOWN_IN
 }
 
-void RecordST_next_k(RecordST *unit, int inNumSamples)
+void RecordBufS_next_k(RecordBufS *unit, int inNumSamples)
 {
 
   if (unit->mDone) {
@@ -331,7 +331,7 @@ void RecordST_next_k(RecordST *unit, int inNumSamples)
 
 //  if (writepos > bufSamples) {   
 //    writepos = 0;
-//    printf("RecordST: writepos: %i; run: %f; bufSamples: %i, fbufnum: %f, inval: %f\n", writepos, run, bufSamples, fbufnum, inval);
+//    printf("RecordBufS: writepos: %i; run: %f; bufSamples: %i, fbufnum: %f, inval: %f\n", writepos, run, bufSamples, fbufnum, inval);
 //  }
 
   //if (inval > 0.f && unit->m_previnval <= 0.f) {
@@ -346,7 +346,7 @@ void RecordST_next_k(RecordST *unit, int inNumSamples)
       // Write time into last note
       table0[0] = phase - unit->m_lastphase;
 
-//      printf("RecordST: wrote time %f to writepos %i. ", table0[0], writepos);
+//      printf("RecordBufS: wrote time %f to writepos %i. ", table0[0], writepos);
 
       // Shift to next note and write values, time will be written at next invalger
       writepos += bufChannels;
@@ -382,19 +382,19 @@ void RecordST_next_k(RecordST *unit, int inNumSamples)
   unit->m_phase = phase;
 }
 
-void IndexST_Ctor(IndexST* unit)
+void PlayBufSIndex_Ctor(PlayBufSIndex* unit)
 {
-  SETCALC(IndexST_next_k);
+  SETCALC(PlayBufSIndex_next_k);
 
   // no need for checkBufferST, only uses first channel, only outputs one channel
 
   unit->m_fbufnum = -1e9f;
   unit->m_val = 0;
 
-  IndexST_next_k(unit, 1);
+  PlayBufSIndex_next_k(unit, 1);
 }
 
-void IndexST_next_k(IndexST *unit, int inNumSamples)
+void PlayBufSIndex_next_k(PlayBufSIndex *unit, int inNumSamples)
 {
   float trig     = ZIN0(1);
   float startPos     = ZIN0(2);
@@ -411,9 +411,9 @@ void IndexST_next_k(IndexST *unit, int inNumSamples)
     val = 0, preval = 0;
     for (uint32 index = 0; index < bufFrames; index ++) {
       val += bufData[index*bufChannels];
-//      printf("IndexST: val:%f index:%i bufFrames:%i bufChannels:%i\n", val, index, bufFrames, bufChannels);
+//      printf("PlayBufSIndex: val:%f index:%i bufFrames:%i bufChannels:%i\n", val, index, bufFrames, bufChannels);
       if (val > startPos) {
-//        printf("IndexST: break at preval %f\n", preval);
+//        printf("PlayBufSIndex: break at preval %f\n", preval);
         break;
       }
       preval = val;
@@ -428,11 +428,11 @@ void IndexST_next_k(IndexST *unit, int inNumSamples)
 }
 
 
-PluginLoad(PlayST)
+PluginLoad(PlayBufS)
 {
     ft = inTable;
-    DefineSimpleUnit(IndexST);
-    DefineSimpleUnit(PlayST);
-    DefineDtorUnit(RecordST);
+    DefineSimpleUnit(PlayBufSIndex);
+    DefineSimpleUnit(PlayBufS);
+    DefineDtorUnit(RecordBufS);
 }
 
