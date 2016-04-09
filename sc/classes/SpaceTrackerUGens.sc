@@ -22,7 +22,7 @@ RecordBufS : UGen {
 	*kr { arg inputArray, bufnum=0, run=1.0, doneAction=0;
 		^this.multiNewList(
 			['control', bufnum, run, doneAction ]
-			++ inputArray.asArray
+			++ inputArray.flop
 		)
 	}
 }
