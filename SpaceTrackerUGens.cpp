@@ -480,11 +480,13 @@ void DetectEndS_next_k(DetectEndS *unit, int inNumSamples)
 {
   GET_BUF_SHARED
   uint32 out = 0;
+  uint32 j = 0;
   for (uint32 i = 0; i < bufSamples; i = i + bufChannels) {
     if (bufData[i] == 0) {
-      out = i;
+      out = j;
       break;
     }
+    j++;
   }
   OUT(0)[0] = out;
 }
