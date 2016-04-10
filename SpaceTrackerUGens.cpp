@@ -137,6 +137,12 @@ struct BufSet : public Unit
   float m_prevtrig;
 };
 
+struct DetectEndS : public Unit
+{
+  float m_fbufnum;
+  SndBuf *m_buf;
+};
+
 static void PlayBufS_next_k(PlayBufS *unit, int inNumSamples);
 static void PlayBufS_Ctor(PlayBufS* unit);
 
@@ -148,6 +154,9 @@ static void PlayBufSIndex_Ctor(PlayBufSIndex* unit);
 
 static void BufSet_next_k(BufSet *unit, int inNumSamples);
 static void BufSet_Ctor(BufSet* unit);
+
+static void DetectEndS_next_k(DetectEndS *unit, int inNumSamples);
+static void DetectEndS_Ctor(DetectEndS* unit);
 
 void PlayBufS_Ctor(PlayBufS* unit)
 {
@@ -454,10 +463,30 @@ void BufSet_next_k(BufSet *unit, int inNumSamples)
     SndBuf* buf2 = unit->mWorld->mSndBufsNonRealTimeMirror + (int)unit->m_fbufnum;
     unit->m_buf->samplerate = samplerate;
     buf2->samplerate = samplerate;
-    printf("SR %f %f\n", unit->m_buf->samplerate, buf2->samplerate);
+    //printf("SR %f %f\n", unit->m_buf->samplerate, buf2->samplerate);
   }
 
   unit->m_prevtrig = trig;
+}
+
+void DetectEndS_Ctor(DetectEndS* unit)
+{
+  SETCALC(DetectEndS_next_k);
+  unit->m_fbufnum = -1e9f;
+  DetectEndS_next_k(unit, 1);
+}
+
+void DetectEndS_next_k(DetectEndS *unit, int inNumSamples)
+{
+  GET_BUF_SHARED
+  uint32 out = 0;
+  for (uint32 i = 0; i < bufSamples; i = i + bufChannels) {
+    if (bufData[i] == 0) {
+      out = i;
+      break;
+    }
+  }
+  OUT(0)[0] = out;
 }
 
 PluginLoad(PlayBufS)
@@ -467,5 +496,6 @@ PluginLoad(PlayBufS)
     DefineSimpleUnit(BufSet);
     DefineSimpleUnit(PlayBufS);
     DefineDtorUnit(RecordBufS);
+    DefineSimpleUnit(DetectEndS);
 }
 
