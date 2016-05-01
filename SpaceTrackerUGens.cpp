@@ -365,10 +365,11 @@ void RecordBufS_next_k(RecordBufS *unit, int inNumSamples)
     } else {
       // Write time into last note
       float* table0 = bufData + writepos;
-      table0[0] = phase - unit->m_lastphase;
+      table0[0] = phase - unit->m_lastphase + BUFDUR; // Write next phase tentatively in case the synth is freed
       if (abs(inval - unit->m_previnval) > 0.f) {
+        table0[0] = phase - unit->m_lastphase; // Write current phase
 
-  //      printf("RecordBufS: wrote time %f to writepos %i. ", table0[0], writepos);
+        //printf("RecordBufS: wrote time %f to writepos %i. ", table0[0], writepos);
 
         // Shift to next note and write values, time will be written at next invalger
         writepos += bufChannels;
