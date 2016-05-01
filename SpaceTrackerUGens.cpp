@@ -329,11 +329,6 @@ void RecordBufS_Dtor(RecordBufS *unit)
 void RecordBufS_next_k(RecordBufS *unit, int inNumSamples)
 {
 
-  if (unit->mDone) {
-    return;
-    // TODO: find out why RecordBuf doesn't need this
-  }
-
   GET_BUF
   CHECK_BUF
   SETUP_IN_ST(3)
@@ -359,7 +354,6 @@ void RecordBufS_next_k(RecordBufS *unit, int inNumSamples)
 
   if (run > 0.f) {
 
-    //if (abs(inval - unit->m_previnval) > 0.f) {
     if (abs(inval - unit->m_previnval) > 0.f) {
     
 
@@ -373,7 +367,6 @@ void RecordBufS_next_k(RecordBufS *unit, int inNumSamples)
       if (writepos >= bufSamples) {
         // ... or quit if we're full
         unit->mDone = true;
-        DoneAction(IN0(2), unit);
       } else {
         table0 = bufData + writepos;
         table0[1] = inval;
@@ -396,6 +389,9 @@ void RecordBufS_next_k(RecordBufS *unit, int inNumSamples)
     OUT(0)[0] = writepos;
 
   }
+
+  if (unit->mDone) {
+    DoneAction(IN0(2), unit);
 
   unit->m_writepos = writepos;
   unit->m_previnval = inval;
