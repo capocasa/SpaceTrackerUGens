@@ -248,7 +248,6 @@ void PlayBufS_next_k(PlayBufS *unit, int inNumSamples)
           index++;
           if (index >= bufFrames) {
             done = true;
-            DoneAction(IN0(4), unit);
             phase = next;
             index = bufFrames - 1;
             break;
@@ -270,7 +269,6 @@ void PlayBufS_next_k(PlayBufS *unit, int inNumSamples)
         silentFrame = 1;
       } else {
         done = true;
-        DoneAction(IN0(4), unit);
         phase = next;
         index = bufFrames - 1;
         //printf("PlayBufS: Played to end. index:%i next:%f phase:%f\n", index, next, phase);
@@ -292,6 +290,9 @@ void PlayBufS_next_k(PlayBufS *unit, int inNumSamples)
       OUT(i)[0] = 0;
     }
   }
+  
+  if (done)
+    DoneAction((int)IN0(4), unit);
 
   unit->mDone = done;
   unit->m_index = index;
