@@ -308,8 +308,8 @@ void RecordBufS_Ctor(RecordBufS *unit)
   unit->m_fbufnum = -1e9f;
   unit->mIn = 0;
   
-  unit->m_writepos = 0;
-  unit->m_previnval = -83886082423.24232423; // something that can't be inval
+  unit->m_writepos = -1;
+  unit->m_previnval = 0;
 
   unit->m_phase = 0;
   unit->m_lastphase = 0;
@@ -337,10 +337,7 @@ void RecordBufS_next_k(RecordBufS *unit, int inNumSamples)
   float inval     = *++(in[0]);
   int32 writepos = unit->m_writepos;
   double phase = unit->m_phase;
-
-
-  float* table0 = bufData + writepos;
-  
+ 
 //  table0[0] = *++(in[0]);
 
 
@@ -354,33 +351,45 @@ void RecordBufS_next_k(RecordBufS *unit, int inNumSamples)
 
   if (run > 0.f) {
 
-    if (abs(inval - unit->m_previnval) > 0.f) {
-    
-
-      // Write time into last note
-      table0[0] = phase - unit->m_lastphase;
-
-//      printf("RecordBufS: wrote time %f to writepos %i. ", table0[0], writepos);
-
-      // Shift to next note and write values, time will be written at next invalger
-      writepos += bufChannels;
-      if (writepos >= bufSamples) {
-        // ... or quit if we're full
+    if (writepos < 0) {
+      float* table0 = bufData;
+      writepos = 0;
+      if (bufSamples == 0) {
         unit->mDone = true;
       } else {
-        table0 = bufData + writepos;
         table0[1] = inval;
         for (uint32 i = 1, j = 2; j < bufChannels; ++i, ++j) {
           table0[j] = *++(in[i]);
         }
+      }
+    } else {
+      // Write time into last note
+      float* table0 = bufData + writepos;
+      table0[0] = phase - unit->m_lastphase;
+      if (abs(inval - unit->m_previnval) > 0.f) {
 
-//        printf("wrote values ");
-//        for (uint32 i = 1; i < bufChannels; i++) {
-//          printf("%f ", table0[i]);
-//        }
-//        printf("at time %f to writepos %i\n", phase, writepos);
+  //      printf("RecordBufS: wrote time %f to writepos %i. ", table0[0], writepos);
 
-        unit->m_lastphase = phase; 
+        // Shift to next note and write values, time will be written at next invalger
+        writepos += bufChannels;
+        if (writepos >= bufSamples) {
+          // ... or quit if we're full
+          unit->mDone = true;
+        } else {
+          table0 = bufData + writepos;
+          table0[1] = inval;
+          for (uint32 i = 1, j = 2; j < bufChannels; ++i, ++j) {
+            table0[j] = *++(in[i]);
+          }
+
+  //        printf("wrote values ");
+  //        for (uint32 i = 1; i < bufChannels; i++) {
+  //          printf("%f ", table0[i]);
+  //        }
+  //        printf("at time %f to writepos %i\n", phase, writepos);
+
+          unit->m_lastphase = phase; 
+        }
       }
     }
 
