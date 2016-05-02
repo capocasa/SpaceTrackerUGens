@@ -397,15 +397,15 @@ void RecordBufS_next_k(RecordBufS *unit, int inNumSamples)
     phase += BUFDUR;
     
     OUT(0)[0] = writepos;
+  
+    unit->m_writepos = writepos;
+    unit->m_previnval = inval;
+    unit->m_phase = phase;
 
   }
 
   if (unit->mDone)
     DoneAction(IN0(2), unit);
-
-  unit->m_writepos = writepos;
-  unit->m_previnval = inval;
-  unit->m_phase = phase;
 }
 
 void PlayBufSIndex_Ctor(PlayBufSIndex* unit)
