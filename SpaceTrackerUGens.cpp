@@ -230,7 +230,7 @@ void PlayBufS_next_k(PlayBufS *unit, int inNumSamples)
       if (next > phase) {
         double prevnext;
         while (true) {
-          printf("PlayBufS: trackback index:%i next:%f phase:%f\n", index, next, phase);
+          //printf("PlayBufS: trackback index:%i next:%f phase:%f\n", index, next, phase);
           prevnext = next;
           next -= bufData[index*bufChannels];
           
