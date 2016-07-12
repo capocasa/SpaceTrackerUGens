@@ -423,8 +423,9 @@ void PlayBufSIndex_Ctor(PlayBufSIndex* unit)
 
 void PlayBufSIndex_next_k(PlayBufSIndex *unit, int inNumSamples)
 {
-  float trig     = ZIN0(1);
-  float startPos     = ZIN0(2);
+  float trig = ZIN0(1);
+  float startPos = ZIN0(2);
+  float controlDurTrunc = ZIN0(3);
 
   GET_BUF_SHARED
 
@@ -436,8 +437,16 @@ void PlayBufSIndex_next_k(PlayBufSIndex *unit, int inNumSamples)
 
   if (trig > 0.f && unit->m_prevtrig <= 0.f) {
     val = 0, preval = 0;
+    float controlDur = unit->mWorld->mFullRate.mBufDuration; 
     for (uint32 index = 0; index < bufFrames; index ++) {
-      val += bufData[index*bufChannels];
+      float length = bufData[index*bufChannels];
+
+      if (controlDurTrunc > 0.f) {
+        //printf("PlayBufSIndex: controlDurTruncing %f by %f to %f\n", length, fmod(length, controlDur), length-fmod(length,controlDur)); 
+        length -= fmod(length, controlDur);
+      }
+      //printf("PlayBufSIndex: controlDurTrunc:%f\n", controlDurTrunc); 
+      val += length;
 //      printf("PlayBufSIndex: val:%f index:%i bufFrames:%i bufChannels:%i\n", val, index, bufFrames, bufChannels);
       if (val > startPos) {
 //        printf("PlayBufSIndex: break at preval %f\n", preval);

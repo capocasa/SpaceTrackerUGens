@@ -31,8 +31,8 @@ PlayBufSIndex : UGen {
   *ar {
     thisMethod.notYetImplemented;
   }
-	*kr { arg bufnum=0, trigger=1.0, startPos=0.0;
-		^this.multiNew('control', bufnum, trigger, startPos)
+	*kr { arg bufnum=0, trigger=1.0, startPos=0.0, controlDurTrunc = 0.0;
+		^this.multiNew('control', bufnum, trigger, startPos, controlDurTrunc)
 	}
 }
 
