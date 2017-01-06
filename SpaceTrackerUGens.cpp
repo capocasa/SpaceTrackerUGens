@@ -267,7 +267,7 @@ void PlayBufS_next_k(PlayBufS *unit, int inNumSamples)
   //printf("out %f %f - %i %i %i %f - %f . %f %f %f\n", rate, phase, index, bufFrames, done, trig, frame[0], frame[1], frame[2], frame[3]);
 
   for (int i = 0, j = 1; j < bufChannels; i++, j++) {
-    if (rate > 0) {
+    if (rate > 0 && done == false) {
       OUT(i)[0] = frame[j];
     } else {
       OUT(i)[0] = 0;
