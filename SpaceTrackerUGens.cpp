@@ -191,7 +191,11 @@ void PlayBufS_next_k(PlayBufS *unit, int inNumSamples)
 
   const float* frame;
 
+  int silentFrame = false; 
+
   int done = unit->mDone;
+
+  int done0 = done;
 
   //if (index < bufFrames) printf("ST: index:%i bufnum:%i bufChannels:%i BUFDUR:%f phase:%f next:%f time:%f note:%f value:%f\n", index, (int) unit->m_fbufnum, bufChannels, BUFDUR, phase, next, frame[0], frame[1], frame[2]);
 
@@ -262,19 +266,7 @@ void PlayBufS_next_k(PlayBufS *unit, int inNumSamples)
   }
 
   frame = bufData + index * bufChannels;
-  
-  // debug output
-  //printf("out %f %f - %i %i %i %f - %f . %f %f %f\n", rate, phase, index, bufFrames, done, trig, frame[0], frame[1], frame[2], frame[3]);
-
-  for (int i = 0, j = 1; j < bufChannels; i++, j++) {
-    if (rate > 0 && done == false) {
-      OUT(i)[0] = frame[j];
-    } else {
-      OUT(i)[0] = 0;
-    }
-  }
-  
-  // Adjust phase gradually, after output
+   
   if (done == false) {
     phase += BUFDUR * rate;
     if (phase >= next) {
@@ -282,6 +274,7 @@ void PlayBufS_next_k(PlayBufS *unit, int inNumSamples)
       if (index < bufFrames-1) {
         index++;
         next += bufData[index*bufChannels];
+        silentFrame = true;
       } else {
         done = true;
         phase = next;
@@ -290,6 +283,17 @@ void PlayBufS_next_k(PlayBufS *unit, int inNumSamples)
       }
     }
     
+  }
+  
+  // debug output
+  //printf("out %f %f - %i %i %i %f - %f . %f %f %f\n", rate, phase, index, bufFrames, done, trig, frame[0], frame[1], frame[2], frame[3]);
+
+  for (int i = 0, j = 1; j < bufChannels; i++, j++) {
+    if (rate > 0 && done0 == false && silentFrame == false) {
+      OUT(i)[0] = frame[j];
+    } else {
+      OUT(i)[0] = 0;
+    }
   }
   
   if (done)
