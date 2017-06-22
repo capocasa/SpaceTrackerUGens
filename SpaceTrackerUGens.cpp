@@ -273,8 +273,12 @@ void PlayBufS_next_k(PlayBufS *unit, int inNumSamples)
       
       if (index < bufFrames-1) {
         index++;
-        next += bufData[index*bufChannels];
-        silentFrame = true;
+        next += frame[0];
+        
+        // Silentframe feature only if not followed by pause
+        if (frame[1] > 0) {
+          silentFrame = true;
+        }
       } else {
         done = true;
         phase = next;
