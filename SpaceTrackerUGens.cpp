@@ -1,4 +1,5 @@
 #include "SC_PlugIn.h"
+#include <iostream>
 
 static InterfaceTable *ft;
 
@@ -143,7 +144,7 @@ struct DetectEndS : public Unit
   SndBuf *m_buf;
 };
 
-static void PlayBufS_next_k(PlayBufS *unit, int inNumSamples);
+static void PlayBufS_next(PlayBufS *unit, int inNumSamples);
 static void PlayBufS_Ctor(PlayBufS* unit);
 
 static void RecordBufS_next_k(RecordBufS *unit, int inNumSamples);
@@ -160,7 +161,7 @@ static void DetectEndS_Ctor(DetectEndS* unit);
 
 void PlayBufS_Ctor(PlayBufS* unit)
 {
-  SETCALC(PlayBufS_next_k);
+  SETCALC(PlayBufS_next);
 
   unit->m_fbufnum = -1e9f;
   unit->m_prevbufnum = -1e9f;
@@ -169,10 +170,10 @@ void PlayBufS_Ctor(PlayBufS* unit)
   unit->m_index = 0;
   unit->m_prevtrig = 0;
 
-  PlayBufS_next_k(unit, 1);
+  //PlayBufS_next(unit, 1);
 }
 
-void PlayBufS_next_k(PlayBufS *unit, int inNumSamples)
+void PlayBufS_next(PlayBufS *unit, int inNumSamples)
 {
   GET_BUF_SHARED
   
@@ -190,7 +191,7 @@ void PlayBufS_next_k(PlayBufS *unit, int inNumSamples)
 
   int done = unit->mDone;
 
-  bool audiorate = inNumSamples == 1;
+  bool audiorate = inNumSamples != 1;
 
   double phase_increment;
   if (audiorate) {
@@ -204,6 +205,7 @@ void PlayBufS_next_k(PlayBufS *unit, int inNumSamples)
 
   int x;
   for (x = 0; x < inNumSamples; x++) {
+  std::cout << "frame audiorate:" << audiorate << " phase:" << unit->m_phase << " x:" << x << " phase:" << phase << " phase_increment:" << phase_increment << " index:"<<index<<"\n";
 
     rate     = IN(1)[x];
     trig     = IN(2)[x];
@@ -224,7 +226,7 @@ void PlayBufS_next_k(PlayBufS *unit, int inNumSamples)
     
     if (trig > 0.f && unit->m_prevtrig <= 0.f) {
 
-      phase = IN(3)[inNumSamples];
+      phase = IN(3)[x];
       
       //printf("PlayBufS: triggered. phase:%f next:%f time:%f bufnum:%f note:%f value:%f\n", phase, next, unit->m_fbufnum, frame[0], frame[1], frame[2]);
       
@@ -264,6 +266,7 @@ void PlayBufS_next_k(PlayBufS *unit, int inNumSamples)
             //printf("PlayBufS: catchup index:%i next:%f phase:%f\n", index, next, phase);
             index++;
             if (index >= bufFrames) {
+          std::cout << "done 2\n";
               done = true;
               phase = next;
               index = bufFrames - 1;
@@ -292,13 +295,14 @@ void PlayBufS_next_k(PlayBufS *unit, int inNumSamples)
     
     // Adjust phase gradually, after output
     if (done == false) {
-      phase += BUFDUR * rate;
+      phase += phase_increment * rate;
       if (phase >= next) {
         
         if (index < bufFrames-1) {
           index++;
           next += bufData[index*bufChannels];
         } else {
+          std::cout << "done 2\n";
           done = true;
           phase = next;
           index = bufFrames - 1;
