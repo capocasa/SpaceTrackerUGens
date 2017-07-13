@@ -367,7 +367,9 @@ void RecordBuf_next(RecordBufS *unit, int inNumSamples)
   float inval     = *++(in[0]);
   int32 writepos = unit->m_writepos;
   double phase = unit->m_phase;
- 
+
+  float previnval = unit->m_previnval;
+  double lastphase = unit->m_lastphase;
 //  table0[0] = *++(in[0]);
 
 
@@ -395,9 +397,9 @@ void RecordBuf_next(RecordBufS *unit, int inNumSamples)
     } else {
       // Write time into last note
       float* table0 = bufData + writepos;
-      table0[0] = phase - unit->m_lastphase + BUFDUR; // Write next phase tentatively in case the synth is freed
-      if (abs(inval - unit->m_previnval) > 0.f) {
-        table0[0] = phase - unit->m_lastphase; // Write current phase
+      table0[0] = phase - lastphase + BUFDUR; // Write next phase tentatively in case the synth is freed
+      if (abs(inval - previnval) > 0.f) {
+        table0[0] = phase - lastphase; // Write current phase
 
         //printf("RecordBufS: wrote time %f to writepos %i. ", table0[0], writepos);
 
@@ -419,17 +421,20 @@ void RecordBuf_next(RecordBufS *unit, int inNumSamples)
   //        }
   //        printf("at time %f to writepos %i\n", phase, writepos);
 
-          unit->m_lastphase = phase; 
+          lastphase = phase; 
         }
       }
     }
 
+    previnval = inval;
+    
     phase += BUFDUR;
     
     OUT(0)[0] = writepos;
-  
+
+    unit->m_lastphase = lastphase;
     unit->m_writepos = writepos;
-    unit->m_previnval = inval;
+    unit->m_previnval = previnval;
     unit->m_phase = phase;
 
   }
