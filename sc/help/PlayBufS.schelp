@@ -1,0 +1,76 @@
+class:: PlayBufS
+summary:: Playback buffer data in timed buffer format
+related:: RecordBufS
+categories::  UGens>Buffer
+
+Description::
+
+Timed buffer format contains in the first channel the number of seconds the values in the other channels are to be held. PlayBufS plays back that kind of data.
+
+classmethods::
+
+method:: ar
+method:: kr
+
+argument::numChannels
+Number of channels, excluding the time channel.
+
+argument::bufnum
+The buffer containing the timed data to play back
+::
+
+argument::rate
+The speed at which to play back the data. 1.0 is normal playback, 2.0 is double speed, 0.5 is half speed. Backwards playback is currently not supported.
+
+argument::trigger
+
+Jump to startPos when input changes from zero or a negative value to a positive one
+
+argument::startPos
+
+The time to jump to on trigger in seconds
+
+argument:: doneAction
+doneAction to execute when playback is complete. See link::Reference/UGen-doneActions:: 
+
+Note: not recommended to use doneAction with multichannel expansion because buffers with timed data commonly have a different length
+
+examples::
+
+// Play some notes
+b=Buffer.sendCollection(s, [0.25,60,0.25,62,0.25,64,0.25,65,0.25,67,0.25,65,0.25,64,0.25,62,0.5,60], 2);
+(
+{
+  // playback numChannels is one less than of buffer
+  var note = PlayBufS.kr(1,b);
+  SinOsc.ar(note.midicps,0,(note>0).lag);
+}.play;
+)
+
+// With velocity 
+b=Buffer.sendCollection(s, [0.25,60,32,0.25,62,48,0.25,64,64,0.25,65,80,0.25,67,96,0.25,65,80,0.25,64,64,0
+.25,62,48,0.5,60,36], 3);
+(
+{
+  var note, velocity;
+  #note, velocity = PlayBufS.kr(2,b);
+  SinOsc.ar(note.midicps,0,(velocity/128).lag);
+}.play;
+)
+
+// With velocity and timbre
+b=Buffer.sendCollection(s, [0.25,60,32,60,0.25,62,48,8,0.25,64,64,127,0.25,65,80,56,0.25,67,96,39,0.25,65,
+80,37,0.25,64,64,23,0.25,62,48,79,0.5,60,36,45], 4);
+(
+{
+  var note, velocity, timbre;
+  #note, velocity, timbre = PlayBufS.kr(3,b);
+  RLPF.ar(Saw.ar(note.midicps,(velocity/128).lag),(timbre/128*4500).lag,0.25);
+}.play;
+)
+
+discussion::
+
+Timed format is a sparse format: It does not require to fill repetitive data into a buffer in order to play back musical notes and other control signals that change infrequently on the server side. For a couple of seconds, this doesn't matter- but if playback gets a little longer, it adds up. Arguably, for audio rate, the difference is great enough to make primary use of recorded audio rate notes feasible for the first time.
+
+
