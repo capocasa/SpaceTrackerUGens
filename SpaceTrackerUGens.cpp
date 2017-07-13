@@ -147,7 +147,7 @@ struct DetectEndS : public Unit
 static void PlayBufS_next(PlayBufS *unit, int inNumSamples);
 static void PlayBufS_Ctor(PlayBufS* unit);
 
-static void RecordBufS_next_k(RecordBufS *unit, int inNumSamples);
+static void RecordBuf_next(RecordBufS *unit, int inNumSamples);
 static void RecordBufS_Ctor(RecordBufS *unit);
 
 static void PlayBufSIndex_next_k(PlayBufSIndex *unit, int inNumSamples);
@@ -344,7 +344,7 @@ void RecordBufS_Ctor(RecordBufS *unit)
   unit->m_phase = 0;
   unit->m_lastphase = 0;
 
-  SETCALC(RecordBufS_next_k);
+  SETCALC(RecordBuf_next);
 
   //printf("RecordBufS_Ctor\n");
 
@@ -356,7 +356,7 @@ void RecordBufS_Dtor(RecordBufS *unit)
   TAKEDOWN_IN
 }
 
-void RecordBufS_next_k(RecordBufS *unit, int inNumSamples)
+void RecordBuf_next(RecordBufS *unit, int inNumSamples)
 {
 
   GET_BUF
