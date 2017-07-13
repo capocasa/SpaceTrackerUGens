@@ -380,6 +380,7 @@ void RecordBuf_next(RecordBufS *unit, int inNumSamples)
   double lastphase = unit->m_lastphase;
 //  table0[0] = *++(in[0]);
 
+  bool done = unit->mDone;
 
 //  if (writepos > bufSamples) {   
 //    writepos = 0;
@@ -393,39 +394,46 @@ void RecordBuf_next(RecordBufS *unit, int inNumSamples)
 
     for (int x = 0; x < inNumSamples; x++) {
       
-      float inval     = *++(in[0]);
+      float inval;
+      float* table0;
+      float time;
 
       if (writepos < 0) {
-        float* table0 = bufData;
+        inval = *++(in[0]);
+        table0 = bufData;
         writepos = 0;
         if (bufSamples == 0) {
-          unit->mDone = true;
+          done = true;
         } else {
-          table0[1] = inval;
           for (uint32 i = 1, j = 2; j < bufChannels; ++i, ++j) {
             table0[j] = *++(in[i]);
           }
         }
       } else {
+        
+        inval = *++(in[0]);
+        table0 = bufData + writepos;
+
         // Write time into last note
-        float* table0 = bufData + writepos;
-        table0[0] = phase - lastphase + phase_increment; // Write next phase tentatively in case the synth is freed
+        time = phase - lastphase;
+        table0[0] = time + phase_increment; // Write next phase tentatively in case the synth is freed
         if (abs(inval - previnval) > 0.f) {
-          table0[0] = phase - lastphase; // Write current phase
+          table0[0] = time; // Write current phase
+            
+          //printf("RecordBufS: wrote time %f with note %f value %f on writepos %i in frame %i. \n", time, table0[1], table0[2], writepos, x);
 
-          //printf("RecordBufS: wrote time %f and inval %f to writepos %i on frame %i. \n", table0[0], writepos, x);
-
-          // Shift to next note and write values, time will be written at next invalger
+          // Shift to next note and write values, time will be written at next
           writepos += bufChannels;
           if (writepos >= bufSamples) {
             // ... or quit if we're full
-            unit->mDone = true;
+            done = true;
           } else {
             table0 = bufData + writepos;
             table0[1] = inval;
-            for (uint32 i = 1, j = 2; j < bufChannels; i++, j++) {
+            for (uint32 i = 1, j = 2; j < bufChannels; ++i, ++j) {
               table0[j] = *++(in[i]);
             }
+          
 
             //        printf("wrote values ");
             //        for (uint32 i = 1; i < bufChannels; i++) {
@@ -433,13 +441,18 @@ void RecordBuf_next(RecordBufS *unit, int inNumSamples)
             //        }
             //        printf("at time %f to writepos %i\n", phase, writepos);
 
-            lastphase = phase; 
+          }
+          lastphase = phase; 
+        } else {
+          // advance unused pointers
+          for (uint32 i = 1, j = 2; j < bufChannels; ++i, ++j) {
+            *++(in[i]);
           }
         }
+
       }
 
       previnval = inval;
-
       phase += phase_increment;
 
       OUT(0)[0] = writepos;
@@ -450,10 +463,10 @@ void RecordBuf_next(RecordBufS *unit, int inNumSamples)
     unit->m_writepos = writepos;
     unit->m_previnval = previnval;
     unit->m_phase = phase;
-
+    unit->mDone = done;
   }
 
-  if (unit->mDone)
+  if (done)
     DoneAction(IN0(2), unit);
 }
 
