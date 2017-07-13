@@ -1,0 +1,36 @@
+class:: PlayBufS
+summary:: Record to buffer data in timed buffer format
+related:: PlayBufS
+categories::  UGens>Buffer
+
+Description::
+
+Record timed buffer format. See PlayBufS for discussions.
+
+classmethods::
+
+method:: ar
+method:: kr
+
+
+argument::inputArray
+
+An array of inputs that contain rarely-changing control data to be recorded.
+
+When the first input changes, all inputs are recorded for one frame. Intermittent input changes on other channels are ignored.
+
+argument::bufnum
+
+The buffer to record to. Buffer numChannels must be one greater than the channels to record, because the first channel of the buffer is used to store timing.
+
+argument::run
+
+Recording gate. Non-zero records, zero pauses recording. This may be modulated.
+
+argument::doneAction
+
+doneAction to execute when done recording.
+
+examples::
+
+
