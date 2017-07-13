@@ -362,9 +362,17 @@ void RecordBuf_next(RecordBufS *unit, int inNumSamples)
   GET_BUF
   CHECK_BUF
   SETUP_IN_ST(3)
+  
+  bool audiorate = inNumSamples != 1;
+
+  double phase_increment;
+  if (audiorate) {
+    phase_increment = SAMPLEDUR;
+  } else {
+    phase_increment = BUFDUR;
+  }
 
   float run     = ZIN0(1);
-  float inval     = *++(in[0]);
   int32 writepos = unit->m_writepos;
   double phase = unit->m_phase;
 
@@ -383,54 +391,60 @@ void RecordBuf_next(RecordBufS *unit, int inNumSamples)
 
   if (run > 0.f) {
 
-    if (writepos < 0) {
-      float* table0 = bufData;
-      writepos = 0;
-      if (bufSamples == 0) {
-        unit->mDone = true;
-      } else {
-        table0[1] = inval;
-        for (uint32 i = 1, j = 2; j < bufChannels; ++i, ++j) {
-          table0[j] = *++(in[i]);
-        }
-      }
-    } else {
-      // Write time into last note
-      float* table0 = bufData + writepos;
-      table0[0] = phase - lastphase + BUFDUR; // Write next phase tentatively in case the synth is freed
-      if (abs(inval - previnval) > 0.f) {
-        table0[0] = phase - lastphase; // Write current phase
+    for (int x = 0; x < inNumSamples; x++) {
+      
+      float inval     = *++(in[0]);
 
-        //printf("RecordBufS: wrote time %f to writepos %i. ", table0[0], writepos);
-
-        // Shift to next note and write values, time will be written at next invalger
-        writepos += bufChannels;
-        if (writepos >= bufSamples) {
-          // ... or quit if we're full
+      if (writepos < 0) {
+        float* table0 = bufData;
+        writepos = 0;
+        if (bufSamples == 0) {
           unit->mDone = true;
         } else {
-          table0 = bufData + writepos;
           table0[1] = inval;
           for (uint32 i = 1, j = 2; j < bufChannels; ++i, ++j) {
             table0[j] = *++(in[i]);
           }
+        }
+      } else {
+        // Write time into last note
+        float* table0 = bufData + writepos;
+        table0[0] = phase - lastphase + phase_increment; // Write next phase tentatively in case the synth is freed
+        if (abs(inval - previnval) > 0.f) {
+          table0[0] = phase - lastphase; // Write current phase
 
-  //        printf("wrote values ");
-  //        for (uint32 i = 1; i < bufChannels; i++) {
-  //          printf("%f ", table0[i]);
-  //        }
-  //        printf("at time %f to writepos %i\n", phase, writepos);
+          //printf("RecordBufS: wrote time %f and inval %f to writepos %i on frame %i. \n", table0[0], writepos, x);
 
-          lastphase = phase; 
+          // Shift to next note and write values, time will be written at next invalger
+          writepos += bufChannels;
+          if (writepos >= bufSamples) {
+            // ... or quit if we're full
+            unit->mDone = true;
+          } else {
+            table0 = bufData + writepos;
+            table0[1] = inval;
+            for (uint32 i = 1, j = 2; j < bufChannels; ++i, ++j) {
+              table0[j] = *++(in[i]);
+            }
+
+            //        printf("wrote values ");
+            //        for (uint32 i = 1; i < bufChannels; i++) {
+            //          printf("%f ", table0[i]);
+            //        }
+            //        printf("at time %f to writepos %i\n", phase, writepos);
+
+            lastphase = phase; 
+          }
         }
       }
-    }
 
-    previnval = inval;
-    
-    phase += BUFDUR;
-    
-    OUT(0)[0] = writepos;
+      previnval = inval;
+
+      phase += phase_increment;
+
+      OUT(0)[0] = writepos;
+
+    }
 
     unit->m_lastphase = lastphase;
     unit->m_writepos = writepos;
