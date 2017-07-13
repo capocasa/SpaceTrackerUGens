@@ -294,9 +294,9 @@ void PlayBufS_next(PlayBufS *unit, int inNumSamples)
 
     for (int i = 0, j = 1; j < bufChannels; i++, j++) {
       if (rate > 0 && done == false) {
-        OUT(i)[0] = frame[j];
+        OUT(i)[x] = frame[j];
       } else {
-        OUT(i)[0] = 0;
+        OUT(i)[x] = 0;
       }
     }
     
