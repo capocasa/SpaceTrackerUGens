@@ -71,6 +71,6 @@ b=Buffer.sendCollection(s, [0.25,60,32,60,0.25,62,48,8,0.25,64,64,127,0.25,65,80
 
 discussion::
 
-Timed format is a sparse format: It does not require to fill repetitive data into a buffer in order to play back musical notes and other control signals that change infrequently on the server side. For a couple of seconds, this doesn't matter- but if playback gets a little longer, it adds up. Arguably, for audio rate, the difference is great enough to make primary use of recorded audio rate notes feasible for the first time.
+Timed format is a sparse format: It does not require to fill repetitive data into a buffer in order to play back musical notes and other control signals that change infrequently on the server side. For a couple of seconds, this doesn't matter- but if playback gets a little longer, it adds up. Arguably, for audio rate, the difference is great enough to make primary use of recorded audio rate notes feasible for the first time. Audio rate notes vastly improve the feel of any percussive performance, which includes the piano, arguably bringing it up to par with acoustic instruments on low latency systems.
 
 
