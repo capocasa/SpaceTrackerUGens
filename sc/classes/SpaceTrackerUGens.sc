@@ -16,13 +16,16 @@ PlayBufS : MultiOutUGen {
 }
 
 RecordBufS : UGen {
-  *ar {
-    thisMethod.notYetImplemented;
-  }
+	*ar { arg inputArray, bufnum=0, run=1.0, doneAction=0;
+		^this.multiNewList(
+			['audio', bufnum, run, doneAction ]
+			++ inputArray.asArray.multiChannelExpand
+		)
+	}
 	*kr { arg inputArray, bufnum=0, run=1.0, doneAction=0;
 		^this.multiNewList(
 			['control', bufnum, run, doneAction ]
-			++ inputArray.flop
+			++ inputArray.asArray.multiChannelExpand
 		)
 	}
 }
