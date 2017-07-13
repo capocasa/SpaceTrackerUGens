@@ -171,6 +171,9 @@ void PlayBufS_Ctor(PlayBufS* unit)
   unit->m_prevtrig = 0;
 
   //PlayBufS_next(unit, 1);
+
+  // std::cout.precision(17);
+
 }
 
 void PlayBufS_next(PlayBufS *unit, int inNumSamples)
@@ -202,13 +205,18 @@ void PlayBufS_next(PlayBufS *unit, int inNumSamples)
 
   float rate;
   float trig;
+  
+  rate     = IN(1)[0];
+  trig     = IN(2)[0];
+  
+  //std::cout << "rate: " << IN(1)[0] << " trig:" << IN(2)[0] << "\n";
 
   int x;
   for (x = 0; x < inNumSamples; x++) {
-  std::cout << "frame audiorate:" << audiorate << " phase:" << unit->m_phase << " x:" << x << " phase:" << phase << " phase_increment:" << phase_increment << " index:"<<index<<"\n";
+  
 
-    rate     = IN(1)[x];
-    trig     = IN(2)[x];
+  
+    //std::cout << "frame audiorate:" << audiorate << " x:" << x << " phase:" << std::fixed << phase << " phase_increment:" << std::fixed << phase_increment << " rate:" << rate <<" r*pi: " << std::fixed << (rate * phase_increment) << "index:"<<index<<" done:" << done << "\n";
 
 
     //if (index < bufFrames) printf("ST: index:%i bufnum:%i bufChannels:%i BUFDUR:%f phase:%f next:%f time:%f note:%f value:%f\n", index, (int) unit->m_fbufnum, bufChannels, BUFDUR, phase, next, frame[0], frame[1], frame[2]);
@@ -266,7 +274,6 @@ void PlayBufS_next(PlayBufS *unit, int inNumSamples)
             //printf("PlayBufS: catchup index:%i next:%f phase:%f\n", index, next, phase);
             index++;
             if (index >= bufFrames) {
-          std::cout << "done 2\n";
               done = true;
               phase = next;
               index = bufFrames - 1;
@@ -301,8 +308,8 @@ void PlayBufS_next(PlayBufS *unit, int inNumSamples)
         if (index < bufFrames-1) {
           index++;
           next += bufData[index*bufChannels];
+          //std::cout << "index: " << index << " next:" << next << " frame:" << x << "\n";
         } else {
-          std::cout << "done 2\n";
           done = true;
           phase = next;
           index = bufFrames - 1;
@@ -311,11 +318,11 @@ void PlayBufS_next(PlayBufS *unit, int inNumSamples)
       }
       
     }
-    
-    if (done)
-      DoneAction((int)IN(4)[x], unit);
 
   }
+  
+  if (done)
+    DoneAction((int)IN0(4), unit);
 
   unit->mDone = done;
   unit->m_index = index;
