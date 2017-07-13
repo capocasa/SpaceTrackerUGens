@@ -423,7 +423,7 @@ void RecordBuf_next(RecordBufS *unit, int inNumSamples)
           } else {
             table0 = bufData + writepos;
             table0[1] = inval;
-            for (uint32 i = 1, j = 2; j < bufChannels; ++i, ++j) {
+            for (uint32 i = 1, j = 2; j < bufChannels; i++, j++) {
               table0[j] = *++(in[i]);
             }
 
