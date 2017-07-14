@@ -1,11 +1,11 @@
 class:: PlayBufS
-summary:: Record to buffer data in timed buffer format
+summary:: Record stepped streams to timed buffer format
 related:: PlayBufS
 categories::  UGens>Buffer
 
 Description::
 
-Record timed buffer format. See PlayBufS for discussions.
+Record a stepped stream to timed buffer format. See PlayBufS for discussions.
 
 classmethods::
 
@@ -15,7 +15,7 @@ method:: kr
 
 argument::inputArray
 
-An array of inputs that contain rarely-changing control data to be recorded.
+An array of inputs that contain stepped streams of control data to be recorded.
 
 When the first input changes, all inputs are recorded for one frame. Intermittent input changes on other channels are ignored.
 
@@ -33,4 +33,49 @@ doneAction to execute when done recording.
 
 examples::
 
+
+MIDIIn.connectAll;
+s.boot;
+
+
+// Record MIDI notes to timed buffer from stepped control rate signal 
+b=Buffer.alloc(s, 768, 3);
+(
+  x={
+    arg note, velocity;
+    RecordBufS.kr([note, velocity], b); // returns frames recorded
+    Saw.ar(note.midicps, 0, (velocity/128).lag);
+  }.play;
+  MIDIFunc.noteOn({|velocity,note|
+    x.set(1, note, 2, velocity);
+  });
+  MIDIFunc.noteOff({|velocity,note|
+    x.set(1, 0, 2, 0);
+  });
+)
+// Adapt to frames recorded
+b.getn(0,36, {|v|v.postln});
+
+
+// Record 2 note polyphonic MIDI notes to timed buffer from stepped audio rate signal
+// (example requires JackAudioUGens for hi-res MIDI)
+b=4.collect{Buffer.alloc(s, 768, 3)};
+(
+  {
+    var in=JackMIDIIn.ar(2,nil,nil,false).poll;
+
+    // recordbuf gets multichannel expanded
+    // returns recorded frames as array
+    RecordBufS.ar(in, b);
+
+    in.collect {|c|
+      var note, velocity;
+      #note, velocity = c;
+      Saw.ar(note.midicps, (velocity/128).lag)
+    }.sum;
+  }.play;
+)
+// Adapt to frames recorded
+b[0].getn(0,36, {|v|v.postln};
+b[1].getn(0,36, {|v|v.postln};
 
