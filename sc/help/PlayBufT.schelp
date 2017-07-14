@@ -1,5 +1,5 @@
 class:: PlayBufT
-summary:: Playback buffer data in timed buffer format as a stepped signal
+summary:: Playback buffer data in timed buffer format, resulting in a stepped signal 
 related:: RecordBufT
 categories::  UGens>Buffer
 
@@ -71,6 +71,6 @@ b=Buffer.sendCollection(s, [0.25,60,32,60,0.25,62,48,8,0.25,64,64,127,0.25,65,80
 
 discussion::
 
-Timed format is a sparse data format for stepped signal streams, drastically reducing the memory required to play back this kind of data without losses. Arguably, for audio rate, the difference is great enough to make primary use of stepped streams as control signals in audio rate feasible for the first time. Audio rate vastly improve the feel of any percussive performance, which includes the piano, perhaps bringing it up to par with acoustic instruments on low latency systems.
+Timed buffer format is sparse, which means that it saves the values in a stream of data only once, even if it is repeated many times. For this type of data, storing it timed drastically reduces the memory required to play it back and store it without losses. Arguably, for audio rate, the difference is great enough to make heavy use of audio rate for control signals feasable for the first time. Using audio rate for musical instrument data vastly improves the feel of any percussive performance, which includes the piano, perhaps bringing it up to par with acoustic instruments on low latency systems.
 
 

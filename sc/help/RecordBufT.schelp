@@ -1,11 +1,11 @@
 class:: RecordBufT
-summary:: Record stepped streams to timed buffer format
+summary:: Record to timed buffer format
 related:: PlayBufT
 categories::  UGens>Buffer
 
 Description::
 
-Record a stepped stream to timed buffer format. See PlayBufT for discussions.
+Record to a timed buffer. See PlayBufT for discussion.
 
 classmethods::
 
@@ -21,7 +21,7 @@ When the first input changes, all inputs are recorded for one frame. Intermitten
 
 argument::bufnum
 
-The buffer to record to. Buffer numChannels must be one greater than the channels to record, because the first channel of the buffer is used to store timing.
+The buffer to record to. Buffer numChannels must be one greater than the channels to record, because the first channel of the buffer is used to store the time the corresponding values are to be held.
 
 argument::run
 
