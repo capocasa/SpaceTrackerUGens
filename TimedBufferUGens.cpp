@@ -537,7 +537,7 @@ void SizeBufT_next_k(SizeBufT *unit, int inNumSamples)
   OUT(0)[0] = out;
 }
 
-PluginLoad(PlayBufT)
+PluginLoad(TimedBuffer)
 {
     ft = inTable;
     DefineSimpleUnit(IndexBufT);
