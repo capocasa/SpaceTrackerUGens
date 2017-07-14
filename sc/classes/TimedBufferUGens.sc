@@ -1,4 +1,4 @@
-PlayBufS : MultiOutUGen {
+PlayBufT : MultiOutUGen {
 
 	*ar { arg numChannels, bufnum=0, rate=1.0, trigger=1.0, startPos=0.0, doneAction=0;
 		^this.multiNew('audio', numChannels, bufnum, rate, trigger, startPos, doneAction)
@@ -15,7 +15,7 @@ PlayBufS : MultiOutUGen {
 	argNamesInputsOffset { ^2 }
 }
 
-RecordBufS : UGen {
+RecordBufT : UGen {
 	*ar { arg inputArray, bufnum=0, run=1.0, doneAction=0;
 		^this.multiNewList(
 			if (inputArray.first.isArray == false) {
@@ -36,7 +36,7 @@ RecordBufS : UGen {
 	}
 }
 
-PlayBufSIndex : UGen {
+IndexBufT : UGen {
   *ar {
     thisMethod.notYetImplemented;
   }
@@ -46,7 +46,7 @@ PlayBufSIndex : UGen {
 }
 
 
-BufEndS : UGen {
+SizeBufT : UGen {
   *ar {
     thisMethod.shouldNotImplement;
   }

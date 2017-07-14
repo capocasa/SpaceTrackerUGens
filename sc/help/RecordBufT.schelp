@@ -1,11 +1,11 @@
-class:: PlayBufS
+class:: RecordBufT
 summary:: Record stepped streams to timed buffer format
-related:: PlayBufS
+related:: PlayBufT
 categories::  UGens>Buffer
 
 Description::
 
-Record a stepped stream to timed buffer format. See PlayBufS for discussions.
+Record a stepped stream to timed buffer format. See PlayBufT for discussions.
 
 classmethods::
 
@@ -43,7 +43,7 @@ b=Buffer.alloc(s, 768, 3);
 (
   x={
     arg note, velocity;
-    RecordBufS.kr([note, velocity], b); // returns frames recorded
+    RecordBufT.kr([note, velocity], b); // returns frames recorded
     Saw.ar(note.midicps, 0, (velocity/128).lag);
   }.play;
   MIDIFunc.noteOn({|velocity,note|
@@ -66,7 +66,7 @@ b=4.collect{Buffer.alloc(s, 768, 3)};
 
     // recordbuf gets multichannel expanded
     // returns recorded frames as array
-    RecordBufS.ar(in, b);
+    RecordBufT.ar(in, b);
 
     in.collect {|c|
       var note, velocity;
