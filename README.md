@@ -2,31 +2,31 @@
 TimedBufferUGens
 =============
 
-Buffer record and playback in timed buffer format, a sparse data format for stepped signals. Allows recording musical instrument data in audio rate with little memory usage.
+Record and playback musical instrument data on the server in timed buffer format, a sparse data format for stepped signals. Allows recording in audio rate with little memory usage.
 
 Build
 -----
 
-1. Clone sc3-plugins 
+Clone sc3-plugins 
 
     cd $MY_SOURCE_DIR
     git clone https://github.com/supercollider/sc3-plugins
 
-2. Clone TimedBufferUGens:
+Clone TimedBufferUGens:
 
     cd $MY_SOURCE_DIR
-    git clone https://github.com/carlocapocasa/timedbufferugens.git TimedBufferUGens.git
+    git clone https://github.com/carlocapocasa/jackmidiugens.git TimedBufferUGens.git
 
-3. Place TimedBufferUGens into your sc3-plugins without confusing git
+Place TimedBufferUGens into your sc3-plugins without confusing git
 
     cd $MY_SOURCE_DIR/sc3-plugins/source
     ln -s ../../TimedBufferUGens
 
-4. Include in sc3-plugins build script
+Include in sc3-plugins build script
 
-Edit $MY_SOURCE_DIR/sc3-plugins/source/CMakeLists.txt and insert a line `TimedBufferUGens` in the `plugins without extras` list
+Edit `$MY_SOURCE_DIR/sc3-plugins/source/CMakeLists.txt` and insert a line `TimedBufferUGens` right before `JoshUGens`
 
-5. Build
+Build
 
     mkdir $MY_SOURCE_DIR/sc3-plugins/build
     cd $MY_SOURCE_DIR/sc3-plugins/build
@@ -35,7 +35,7 @@ Edit $MY_SOURCE_DIR/sc3-plugins/source/CMakeLists.txt and insert a line `TimedBu
     cmake .. -DSUPERNOVA=on 
     make TimedBufferUGens JackMIDIUgens_supernova
 
-6. Install
+Install
 
     sudo ln -s $MY_SOURCE_DIR/sc3-plugins/build/source/TimedBufferUGens.so /usr/lib/SuperCollider/plugins
     sudo ln -s $MY_SOURCE_DIR/sc3-plugins/build/source/TimedBufferUGens_supernova.so /usr/lib/SuperCollider/plugins 
@@ -54,7 +54,7 @@ Update
 Usage
 -----
 
-Please see the help file sc/help/PlayBufS.sc for discussion and examples
+Please see the help file sc/help/PlayBufT.sc for instructions and examples
 
 License
 -------
