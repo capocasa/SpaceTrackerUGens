@@ -24,7 +24,7 @@ Place TimedBufferUGens into your sc3-plugins without confusing git
 
 Include in sc3-plugins build script
 
-Edit `$MY_SOURCE_DIR/sc3-plugins/source/CMakeLists.txt` and insert a line `TimedBufferUGens` right before `JoshUGens`
+Edit `$MY_SOURCE_DIR/sc3-plugins/source/CMakeLists.txt` and insert a line `TimedBufferUGens` in the section `plugins without extras`
 
 Build
 
