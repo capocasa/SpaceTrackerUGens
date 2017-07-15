@@ -19,7 +19,6 @@
 */
 
 #include "SC_PlugIn.h"
-#include <iostream>
 
 static InterfaceTable *ft;
 
