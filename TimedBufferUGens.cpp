@@ -1,6 +1,6 @@
 /*
     TimedBufferUGens Timed Buffer Format UGens for SuperCollider 
-    Copyright (c) 2017 Carlo Capocasa. All rights reserved.
+    Copyright (c) 2014-2017 Carlo Capocasa. All rights reserved.
     https://capocasa.net
 
     This program is free software; you can redistribute it and/or modify
