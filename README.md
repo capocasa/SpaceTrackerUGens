@@ -15,7 +15,7 @@ Clone sc3-plugins
 Clone TimedBufferUGens:
 
     cd $MY_SOURCE_DIR
-    git clone https://github.com/carlocapocasa/jackmidiugens.git TimedBufferUGens.git
+    git clone https://github.com/carlocapocasa/TimedBufferUGens.git
 
 Place TimedBufferUGens into your sc3-plugins without confusing git
 
