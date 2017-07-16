@@ -30,10 +30,15 @@ argument::startPos
 
 The time to jump to on trigger in seconds
 
+argument:: loop
+
+Loop playback.
+
 argument:: doneAction
+
 doneAction to execute when playback is complete. See link::Reference/UGen-doneActions:: 
 
-Note: not recommended to use doneAction with multichannel expansion because buffers with timed data commonly have a different length
+Note: For multichannel expanded data and looping, each channel must have the same length to avoid unexpected behavior.
 
 examples::
 
