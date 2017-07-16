@@ -200,6 +200,8 @@ void PlayBufT_next(PlayBufT *unit, int inNumSamples)
   float bufnum = unit->m_fbufnum;
   float prevbufnum = unit->m_prevbufnum;
 
+  bool loop = IN0(4);
+
   const float* frame;
 
   int done = unit->mDone;
@@ -320,10 +322,16 @@ void PlayBufT_next(PlayBufT *unit, int inNumSamples)
           next += bufData[index*bufChannels];
           //std::cout << "index: " << index << " next:" << next << " frame:" << x << "\n";
         } else {
-          done = true;
-          phase = next;
-          index = bufFrames - 1;
-          //printf("PlayBufT: Played to end. index:%i next:%f phase:%f\n", index, next, phase);
+          if (loop) {
+            index = 0;
+            phase = 0;
+            next = bufData[0];;
+          } else {
+            done = true;
+            phase = next;
+            index = bufFrames - 1;
+            //printf("PlayBufT: Played to end. index:%i next:%f phase:%f\n", index, next, phase);
+          }
         }
       }
       
@@ -332,7 +340,7 @@ void PlayBufT_next(PlayBufT *unit, int inNumSamples)
   }
   
   if (done)
-    DoneAction((int)IN0(4), unit);
+    DoneAction((int)IN0(5), unit);
 
   unit->mDone = done;
   unit->m_index = index;
