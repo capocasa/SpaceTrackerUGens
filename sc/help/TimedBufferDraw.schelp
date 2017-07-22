@@ -1,0 +1,107 @@
+class:: TimedBufferDraw
+summary:: A graphical utility to visualize what timed buffer data looks like.
+related:: SpaceTracker,PlayBufS,RecordBufS
+categories:: GUI
+
+description:
+
+Visualizes what polyphonic timed buffer data looks like in a GUI window to help understanding nitpicky details of the format.
+
+On the server, this type of audio data is usually represented as an array of buffers and stored as indexed sound files. To visualize it, an array of floatarrays containing the data is used.
+
+classmethods::
+
+method:: new 
+
+Creates a TimedBufferDraw object and immediately opens a window containing the visualization. The object may be discarded or used for closing the window.
+
+argument:: data
+
+An array of FloatArrays containing data in timed buffer format to visualize 
+
+argument:: clump
+
+The number of channels that make up a frame of data, including the time channel
+
+argument:: title
+
+An optional window title
+
+methods:
+
+method:: close
+
+Closes the window programmatically.
+
+examples::
+
+Create some simple data and visualize it
+
+code::
+(
+  w=TimedBufferDraw([[
+    0.5,   60, 64,
+    0.125, 72, 52,
+    0.125, 60, 32
+  ],[
+    0.125, 72, 52,
+    0.125, 60, 32
+  ],[
+    0.5,   60, 64,
+    0.125, 72, 52,
+    0.125, 60, 32
+  ],[
+    0.125, 72, 52
+  ]],3,"Simple Data");
+)
+w.close;
+::
+
+Since SpaceTracker renders to timed buffer format, this utility is great for visualizing the rendering of a SpaceTracker file to experiment a little and better understand the format.
+
+code::
+(
+  d=SpaceTracker("
+1 4 c1
+ 1 4 c1
+ 1 4 c1
+1 4 c1
+ 0
+  1 8 c1
+  1 8 c1
+  1 8 c1
+ 0
+  1 8 c1
+  1 8 c1
+ 0
+  1 8 c1
+0
+ 1 4 c1
+ 1 4 c1
+", "data.wav").toSoundFile.collect {|sf|
+    // ignore or copy/paste this block- it's just to read the data from the sound files
+    // in the format just like above
+    var all = FloatArray(), block = FloatArray.newClear(100);
+    sf.openRead;
+    while {
+      sf.readData(block);
+      block.postln;
+      all = all ++ block;
+      block.size==100;
+    } {
+    };
+    sf.close;
+    all;
+  };
+  w=SpaceTrackerDraw(d, 2, "SpaceTracker data");
+)
+
+w.close;
+::
+
+discussion::
+
+Timed buffer data and also the SpaceTracker format that renders to it for playback is great once understood, however sometimes it can help to see what kind of notes exactly a SpaceTracker formatted file will render to when it becomes multichannel. It's also great to visulaize columns of timed data itself.
+
+This has been used as a development tool, but is also interesting for better understanding the two formats.
+
