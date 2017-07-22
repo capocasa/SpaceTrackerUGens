@@ -83,4 +83,13 @@ FinalFrameT : UGen {
   }
 }
 
++ Buffer {
+  *allocTimed {
+    arg server, polyphony=1, numChannels=1, frames = 16384;
+    if (polyphony == 1) {
+      ^Buffer.alloc(server, frames, numChannels + 1);
+    };
+    ^polyphony.collect{Buffer.alloc(server, frames, numChannels + 1)};
+  }
+}
 
