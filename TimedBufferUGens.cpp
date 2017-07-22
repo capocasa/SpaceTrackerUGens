@@ -295,7 +295,14 @@ void PlayBufT_next(PlayBufT *unit, int inNumSamples)
               index = bufFrames - 1;
               break;
             }
-            next += bufData[index*bufChannels];
+            float time = bufData[index*bufChannels];
+            if (time == 0) {
+              done = true;
+              phase = next;
+              index--;
+              break;
+            }
+            next += time;
           }
           //printf("PlayBufT: caught up. index:%i next:%f phase:%f\n", index, next, phase);
         }
