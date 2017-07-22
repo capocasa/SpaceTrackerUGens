@@ -151,7 +151,7 @@ struct IndexBufT : public Unit
 };
 
 
-struct SizeBufT : public Unit
+struct FinalFrameT: public Unit
 {
   float m_fbufnum;
   SndBuf *m_buf;
@@ -166,8 +166,8 @@ static void RecordBufT_Ctor(RecordBufT *unit);
 static void IndexBufT_next_k(IndexBufT *unit, int inNumSamples);
 static void IndexBufT_Ctor(IndexBufT* unit);
 
-static void SizeBufT_next_k(SizeBufT *unit, int inNumSamples);
-static void SizeBufT_Ctor(SizeBufT* unit);
+static void FinalFrameT_next_k(FinalFrameT *unit, int inNumSamples);
+static void FinalFrameT_Ctor(FinalFrameT* unit);
 
 void PlayBufT_Ctor(PlayBufT* unit)
 {
@@ -315,26 +315,49 @@ void PlayBufT_next(PlayBufT *unit, int inNumSamples)
     // Adjust phase gradually, after output
     if (done == false) {
       phase += phase_increment * rate;
-      if (phase >= next) {
-        
-        if (index < bufFrames-1) {
-          index++;
-          next += bufData[index*bufChannels];
-          //std::cout << "index: " << index << " next:" << next << " frame:" << x << "\n";
-        } else {
-          if (loop) {
-            index = 0;
-            phase = 0;
-            next = bufData[0];;
+ 
+      if (phase < 0) {
+        if (phase <= next) {
+
+          if (index > 0) {
+            index--;
+            next -= bufData[index*bufChannels];
+            //std::cout << "index: " << index << " next:" << next << " frame:" << x << "\n";
           } else {
-            done = true;
-            phase = next;
-            index = bufFrames - 1;
-            //printf("PlayBufT: Played to end. index:%i next:%f phase:%f\n", index, next, phase);
+            if (loop) {
+              for (index = 0; index < bufFrames; index++) {
+                phase += bufData[index];
+              }
+              next = bufData[index];
+            } else {
+              done = true;
+              phase = next;
+              index = 0;
+              //printf("PlayBufT: Played to end. index:%i next:%f phase:%f\n", index, next, phase);
+            }
           }
         }
-      }
-      
+      } else {
+        if (phase >= next) {
+
+          if (index < bufFrames-1) {
+            index++;
+            next += bufData[index*bufChannels];
+            //std::cout << "index: " << index << " next:" << next << " frame:" << x << "\n";
+          } else {
+            if (loop) {
+              index = 0;
+              phase = 0;
+              next = bufData[0];
+            } else {
+              done = true;
+              phase = next;
+              index = bufFrames - 1;
+              //printf("PlayBufT: Played to end. index:%i next:%f phase:%f\n", index, next, phase);
+            }
+          }
+        }
+      }  
     }
 
   }
@@ -542,14 +565,14 @@ void IndexBufT_next_k(IndexBufT *unit, int inNumSamples)
   unit->m_prevtrig = trig;
 }
 
-void SizeBufT_Ctor(SizeBufT* unit)
+void FinalFrameT_Ctor(FinalFrameT* unit)
 {
-  SETCALC(SizeBufT_next_k);
+  SETCALC(FinalFrameT_next_k);
   unit->m_fbufnum = -1e9f;
-  SizeBufT_next_k(unit, 1);
+  FinalFrameT_next_k(unit, 1);
 }
 
-void SizeBufT_next_k(SizeBufT *unit, int inNumSamples)
+void FinalFrameT_next_k(FinalFrameT *unit, int inNumSamples)
 {
   GET_BUF_SHARED
   uint32 out = 0;
@@ -570,6 +593,6 @@ PluginLoad(TimedBuffer)
     DefineSimpleUnit(IndexBufT);
     DefineSimpleUnit(PlayBufT);
     DefineDtorUnit(RecordBufT);
-    DefineSimpleUnit(SizeBufT);
+    DefineSimpleUnit(FinalFrameT);
 }
 

@@ -46,12 +46,41 @@ IndexBufT : UGen {
 }
 
 
-SizeBufT : UGen {
+FinalFrameT : UGen {
   *ar {
     thisMethod.shouldNotImplement;
   }
 	*kr { arg bufnum=0;
 		^this.multiNew('control', bufnum)
 	}
+  
+  
+  // RecordBufT can never record a zero pause, because
+  // a trigger will always be at least one control period.
+  // DetectEndS finds the first zero pause, which marks
+  // then end of a recording.
+  detect {
+    arg buffer;
+    var path, responder, id, frames, cond;
+    cond = Condition.new;
+    id = 262144.rand;
+    path = '/finalFrameT';
+    responder = OSCFunc({|msg|
+      if (msg[2] == id) {
+        frames = msg[3..];
+        cond.test = true;
+        cond.signal;
+      };
+    }, path);
+    {
+      SendReply.kr(Impulse.kr, path, DetectEndT.kr(buffer), id);
+      FreeSelf.kr(Impulse.kr);
+    }.play(buffer[0].server.defaultGroup);
+    cond.test = false;
+    cond.wait;
+    responder.free;
+    ^frames;
+  }
 }
+
 
