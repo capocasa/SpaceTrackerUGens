@@ -19,6 +19,7 @@
 */
 
 #include "SC_PlugIn.h"
+#include "stdio.h"
 
 static InterfaceTable *ft;
 
@@ -236,7 +237,7 @@ void PlayBufT_next(PlayBufT *unit, int inNumSamples)
     if (prevbufnum != bufnum) {
       next = bufData[0];
       if (next == 0) {
-        next = 16777215;
+        done = true;
       }
       //printf("PlayBufT: initialized. rate:%f phase:%f next: %f\n bufnum:%f prevbufnum:%f\n", rate, phase, next, bufnum, prevbufnum);
     }
@@ -245,10 +246,13 @@ void PlayBufT_next(PlayBufT *unit, int inNumSamples)
     // Respont to triggers instantly, before output
     
     if (trig > 0.f && unit->m_prevtrig <= 0.f) {
-
+    
+      //printf("PlayBufT: triggered. phase:%f next:%f time:%f bufnum:%f note:%f value:%f\n", phase, next, unit->m_fbufnum, frame[0], frame[1], frame[2]);
+      
+      //printf("PlayBufT: phase:%f next:%f \n", phase, next);
+      
       phase = IN(3)[x];
       
-      //printf("PlayBufT: triggered. phase:%f next:%f time:%f bufnum:%f note:%f value:%f\n", phase, next, unit->m_fbufnum, frame[0], frame[1], frame[2]);
       
   //    printf("ST: buffer dump ");
   //    for (int i = 0; i < (bufFrames * bufChannels); i++) {
@@ -262,7 +266,7 @@ void PlayBufT_next(PlayBufT *unit, int inNumSamples)
         index = 0;
         phase = 0;
         if (next == 0) {
-          next = 16777215;
+          done = true;
         }
       } else {
         if (next > phase) {
