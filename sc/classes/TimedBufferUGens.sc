@@ -60,7 +60,19 @@ FinalFrameT : UGen {
   // DetectEndS finds the first zero pause, which marks
   // then end of a recording.
   detect {
-    arg buffer;
+  }
+}
+
++ Buffer {
+  *allocTimed {
+    arg server, polyphony=1, numChannels=1, frames = 16384;
+    if (polyphony == 1) {
+      ^Buffer.alloc(server, frames, numChannels + 1);
+    };
+    ^polyphony.collect{Buffer.alloc(server, frames, numChannels + 1)};
+  }
+  
+  detectFramesTimed {
     var path, responder, id, frames, cond;
     cond = Condition.new;
     id = 262144.rand;
@@ -73,23 +85,30 @@ FinalFrameT : UGen {
       };
     }, path);
     {
-      SendReply.kr(Impulse.kr, path, DetectEndT.kr(buffer), id);
+      SendReply.kr(Impulse.kr, path, FinalFrameT.kr(this), id);
       FreeSelf.kr(Impulse.kr);
-    }.play(buffer[0].server.defaultGroup);
+    }.play(this.server.defaultGroup);
     cond.test = false;
     cond.wait;
     responder.free;
     ^frames;
   }
-}
 
-+ Buffer {
-  *allocTimed {
-    arg server, polyphony=1, numChannels=1, frames = 16384;
-    if (polyphony == 1) {
-      ^Buffer.alloc(server, frames, numChannels + 1);
+  writeTimed {
+    arg path, headerFormat, numFrames, startFrame, completionMessage;
+    if (numFrames.isNil) {
+      numFrames = this.detectFramesTimed;
     };
-    ^polyphony.collect{Buffer.alloc(server, frames, numChannels + 1)};
+    this.write(path, headerFormat, "float", numFrames, startFrame, false, completionMessage);
+  }
+
+  *readTimed {
+    arg server, path, startFrame = 0, numFrames = -1;
+    ^this.read(server, path, startFrame, numFrames);
+  }
+  readTimed {
+    arg argpath, fileStartFrame = 0, numFrames = -1, bufStartFrame = 0;
+    this.read(argpath, fileStartFrame, numFrames, bufStartFrame);
   }
 }
 
