@@ -156,6 +156,8 @@ struct FinalFrameT: public Unit
 {
   float m_fbufnum;
   SndBuf *m_buf;
+  float prevtrig;
+  uint32 out;
 };
 
 static void PlayBufT_next(PlayBufT *unit, int inNumSamples);
@@ -563,22 +565,29 @@ void FinalFrameT_Ctor(FinalFrameT* unit)
 {
   SETCALC(FinalFrameT_next_k);
   unit->m_fbufnum = -1e9f;
+  unit->prevtrig = 0;
+  unit->out = 0;
   FinalFrameT_next_k(unit, 1);
 }
 
 void FinalFrameT_next_k(FinalFrameT *unit, int inNumSamples)
 {
   GET_BUF_SHARED
-  uint32 out = 0;
+  uint32 out = unit->out;
+  float trig = IN0(1);
   uint32 j = 0;
-  for (uint32 i = 0; i < bufSamples; i = i + bufChannels) {
-    if (bufData[i] == 0) {
-      out = j;
-      break;
+  if (trig > 0.f && unit->prevtrig <= 0.f) {
+    for (uint32 i = 0; i < bufSamples; i = i + bufChannels) {
+      if (bufData[i] == 0) {
+        out = j;
+        break;
+      }
+      j++;
     }
-    j++;
   }
-  OUT(0)[0] = out;
+  OUT0(0) = out;
+  unit->prevtrig = trig;
+  unit->out = out;
 }
 
 PluginLoad(TimedBuffer)

@@ -50,8 +50,8 @@ FinalFrameT : UGen {
   *ar {
     thisMethod.shouldNotImplement;
   }
-	*kr { arg bufnum=0;
-		^this.multiNew('control', bufnum)
+	*kr { arg bufnum=0, trig = 1;
+		^this.multiNew('control', bufnum, trig)
 	}
   
   
@@ -79,7 +79,7 @@ FinalFrameT : UGen {
     path = '/finalFrameT';
     responder = OSCFunc({|msg|
       if (msg[2] == id) {
-        frames = msg[3..];
+        frames = msg[3];
         cond.test = true;
         cond.signal;
       };
@@ -95,11 +95,14 @@ FinalFrameT : UGen {
   }
 
   writeTimed {
-    arg path, headerFormat, numFrames, startFrame, completionMessage;
-    if (numFrames.isNil) {
-      numFrames = this.detectFramesTimed;
+    arg path, headerFormat="aiff", numFrames, startFrame=0, completionMessage;
+    forkIfNeeded {
+      if (numFrames.isNil) {
+        this.updateInfo;
+        numFrames = this.detectFramesTimed;
+      };
+      this.write(path, headerFormat, "float", numFrames, startFrame, false, completionMessage);
     };
-    this.write(path, headerFormat, "float", numFrames, startFrame, false, completionMessage);
   }
 
   *readTimed {
