@@ -161,7 +161,7 @@ struct FinalFrameT: public Unit
 static void PlayBufT_next(PlayBufT *unit, int inNumSamples);
 static void PlayBufT_Ctor(PlayBufT* unit);
 
-static void RecordBuf_next(RecordBufT *unit, int inNumSamples);
+static void RecordBufT_next(RecordBufT *unit, int inNumSamples);
 static void RecordBufT_Ctor(RecordBufT *unit);
 
 static void IndexBufT_next_k(IndexBufT *unit, int inNumSamples);
@@ -396,9 +396,7 @@ void RecordBufT_Ctor(RecordBufT *unit)
   unit->m_phase = 0;
   unit->m_lastphase = 0;
 
-  SETCALC(RecordBuf_next);
-
-  //printf("RecordBufT_Ctor\n");
+  SETCALC(RecordBufT_next);
 
   ClearUnitOutputs(unit, 1);
 }
@@ -408,7 +406,7 @@ void RecordBufT_Dtor(RecordBufT *unit)
   TAKEDOWN_IN
 }
 
-void RecordBuf_next(RecordBufT *unit, int inNumSamples)
+void RecordBufT_next(RecordBufT *unit, int inNumSamples)
 {
 
   GET_BUF
