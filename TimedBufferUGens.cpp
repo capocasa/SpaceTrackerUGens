@@ -613,6 +613,8 @@ void BufFramesT_next_k(BufFramesT *unit, int inNumSamples)
 //printf("6\n");
       time += length; 
     }
+  } else {
+    DoneAction((int)IN0(4), unit);
   }
   
   OUT0(0) = out;
