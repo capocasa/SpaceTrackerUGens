@@ -46,21 +46,22 @@ IndexBufT : UGen {
 }
 
 
-FinalFrameT : UGen {
+// RecordBufT can never record a zero pause, because
+// a trigger will always be at least one control period.
+// BufFramesT finds the first zero pause, which marks
+// the end of a recording.
+
+BufFramesT : MultiOutUGen {
   *ar {
     thisMethod.shouldNotImplement;
   }
-	*kr { arg bufnum=0, trig = 1;
-		^this.multiNew('control', bufnum, trig)
+	*kr { arg bufnum=0, trig = 1, startTime=0, endTime=0;
+		^this.multiNew('control', bufnum, trig, startTime, endTime)
 	}
-  
-  
-  // RecordBufT can never record a zero pause, because
-  // a trigger will always be at least one control period.
-  // DetectEndS finds the first zero pause, which marks
-  // then end of a recording.
-  detect {
-  }
+	init { arg ... theInputs;
+		inputs = theInputs;
+		^this.initOutputs(3, rate);
+	}
 }
 
 + Buffer {

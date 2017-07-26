@@ -152,12 +152,14 @@ struct IndexBufT : public Unit
 };
 
 
-struct FinalFrameT: public Unit
+struct BufFramesT: public Unit
 {
   float m_fbufnum;
   SndBuf *m_buf;
   float prevtrig;
   uint32 out;
+  float pre;
+  float post;
 };
 
 static void PlayBufT_next(PlayBufT *unit, int inNumSamples);
@@ -169,8 +171,8 @@ static void RecordBufT_Ctor(RecordBufT *unit);
 static void IndexBufT_next_k(IndexBufT *unit, int inNumSamples);
 static void IndexBufT_Ctor(IndexBufT* unit);
 
-static void FinalFrameT_next_k(FinalFrameT *unit, int inNumSamples);
-static void FinalFrameT_Ctor(FinalFrameT* unit);
+static void BufFramesT_next_k(BufFramesT *unit, int inNumSamples);
+static void BufFramesT_Ctor(BufFramesT* unit);
 
 void PlayBufT_Ctor(PlayBufT* unit)
 {
@@ -561,31 +563,57 @@ void IndexBufT_next_k(IndexBufT *unit, int inNumSamples)
   unit->m_prevtrig = trig;
 }
 
-void FinalFrameT_Ctor(FinalFrameT* unit)
+void BufFramesT_Ctor(BufFramesT* unit)
 {
-  SETCALC(FinalFrameT_next_k);
+  SETCALC(BufFramesT_next_k);
   unit->m_fbufnum = -1e9f;
   unit->prevtrig = 0;
   unit->out = 0;
-  FinalFrameT_next_k(unit, 1);
+  unit->pre = 0;
+  unit->post = 0;
+  BufFramesT_next_k(unit, 1);
 }
 
-void FinalFrameT_next_k(FinalFrameT *unit, int inNumSamples)
+void BufFramesT_next_k(BufFramesT *unit, int inNumSamples)
 {
   GET_BUF_SHARED
   uint32 out = unit->out;
+  float pre = unit->pre;
+  float post = unit->post;
   float trig = IN0(1);
+  float start = IN0(2);
+  float end = IN0(3) + start;
+  float time = 0;
+  float length = 0;
   uint32 j = 0;
+
   if (trig > 0.f && unit->prevtrig <= 0.f) {
     for (uint32 i = 0; i < bufSamples; i = i + bufChannels) {
-      if (bufData[i] == 0) {
+      length = bufData[i];
+      printf("3 length:%f bufChannels:%i end:%f time:%f\n", length, bufChannels, end, time);
+      if (length == 0 || (end > 0.f && time >= end)) {
+        post = time - end;
         out = j;
+        printf("2 post:%f\n", post);
         break;
       }
-      j++;
+      printf("1 time:%f start:%f\n",time,start);
+      if (time >= start) {
+        if (start > 0 && pre == 0) {
+          pre = time - start;
+          printf("5\n");
+        }
+        printf("4 pre:%f\n", pre);
+        j++;
+      }
+      printf("6\n");
+      time += length; 
     }
   }
+  
   OUT0(0) = out;
+  OUT0(1) = pre;
+  OUT0(2) = post;
   unit->prevtrig = trig;
   unit->out = out;
 }
@@ -596,6 +624,6 @@ PluginLoad(TimedBuffer)
     DefineSimpleUnit(IndexBufT);
     DefineSimpleUnit(PlayBufT);
     DefineDtorUnit(RecordBufT);
-    DefineSimpleUnit(FinalFrameT);
+    DefineSimpleUnit(BufFramesT);
 }
 
