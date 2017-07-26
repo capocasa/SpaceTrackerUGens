@@ -593,7 +593,9 @@ void BufFramesT_next_k(BufFramesT *unit, int inNumSamples)
 //printf("3 length:%f bufChannels:%i end:%f time:%f\n", length, bufChannels, end, time);
       if (length == 0 || (end > 0.f && time >= end)) {
         post = time - end;
-        j++;
+        if (length > 0) {
+          j++;
+        }
         out = j;
 //printf("2 post:%f\n", post);
         
