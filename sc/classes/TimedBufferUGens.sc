@@ -55,8 +55,8 @@ BufFramesT : MultiOutUGen {
   *ar {
     thisMethod.shouldNotImplement;
   }
-	*kr { arg bufnum=0, trig = 1, startTime=0, endTime=0;
-		^this.multiNew('control', bufnum, trig, startTime, endTime)
+	*kr { arg bufnum=0, trig = 1, startTime=0, endTime=0, doneAction=0;
+		^this.multiNew('control', bufnum, trig, startTime, endTime, doneAction)
 	}
 	init { arg ... theInputs;
 		inputs = theInputs;

@@ -590,23 +590,25 @@ void BufFramesT_next_k(BufFramesT *unit, int inNumSamples)
   if (trig > 0.f && unit->prevtrig <= 0.f) {
     for (uint32 i = 0; i < bufSamples; i = i + bufChannels) {
       length = bufData[i];
-      printf("3 length:%f bufChannels:%i end:%f time:%f\n", length, bufChannels, end, time);
+//printf("3 length:%f bufChannels:%i end:%f time:%f\n", length, bufChannels, end, time);
       if (length == 0 || (end > 0.f && time >= end)) {
         post = time - end;
+        j++;
         out = j;
-        printf("2 post:%f\n", post);
+//printf("2 post:%f\n", post);
+        
         break;
       }
-      printf("1 time:%f start:%f\n",time,start);
+//printf("1 time:%f start:%f\n",time,start);
       if (time >= start) {
         if (start > 0 && pre == 0) {
           pre = time - start;
-          printf("5\n");
+//printf("5\n");
         }
-        printf("4 pre:%f\n", pre);
+//printf("4 pre:%f\n", pre);
         j++;
       }
-      printf("6\n");
+//printf("6\n");
       time += length; 
     }
   }
@@ -616,6 +618,8 @@ void BufFramesT_next_k(BufFramesT *unit, int inNumSamples)
   OUT0(2) = post;
   unit->prevtrig = trig;
   unit->out = out;
+  unit->pre = pre;
+  unit->post = post;
 }
 
 PluginLoad(TimedBuffer)
