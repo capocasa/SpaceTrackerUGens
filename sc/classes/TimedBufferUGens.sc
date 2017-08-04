@@ -60,7 +60,7 @@ BufFramesT : MultiOutUGen {
 	}
 	init { arg ... theInputs;
 		inputs = theInputs;
-		^this.initOutputs(3, rate);
+		^this.initOutputs(4, rate);
 	}
 }
 

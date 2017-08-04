@@ -157,7 +157,8 @@ struct BufFramesT: public Unit
   float m_fbufnum;
   SndBuf *m_buf;
   float prevtrig;
-  uint32 out;
+  uint32 offset;
+  uint32 count;
   float pre;
   float post;
 };
@@ -568,7 +569,8 @@ void BufFramesT_Ctor(BufFramesT* unit)
   SETCALC(BufFramesT_next_k);
   unit->m_fbufnum = -1e9f;
   unit->prevtrig = 0;
-  unit->out = 0;
+  unit->count = 0;
+  unit->offset = 0;
   unit->pre = 0;
   unit->post = 0;
   BufFramesT_next_k(unit, 1);
@@ -577,12 +579,16 @@ void BufFramesT_Ctor(BufFramesT* unit)
 void BufFramesT_next_k(BufFramesT *unit, int inNumSamples)
 {
   GET_BUF_SHARED
-  uint32 out = unit->out;
+  uint32 count = unit->count;
+  uint32 offset = unit->offset;
   float pre = unit->pre;
   float post = unit->post;
   float trig = IN0(1);
   float start = IN0(2);
-  float end = IN0(3) + start;
+  float end = IN0(3);
+  if (end > 0) {
+    end += start;
+  }
   float time = 0;
   float length = 0;
   uint32 j = 0;
@@ -592,13 +598,13 @@ void BufFramesT_next_k(BufFramesT *unit, int inNumSamples)
       length = bufData[i];
 //printf("3 length:%f bufChannels:%i end:%f time:%f\n", length, bufChannels, end, time);
       if (length == 0 || (end > 0.f && time >= end)) {
-        post = time - end;
+        post = time - end - length;
         if (length > 0) {
           j++;
         }
-        out = j;
+        count = j + 1; // j is zero-based, need 1-based for length
 //printf("2 post:%f\n", post);
-        
+
         break;
       }
 //printf("1 time:%f start:%f\n",time,start);
@@ -606,6 +612,7 @@ void BufFramesT_next_k(BufFramesT *unit, int inNumSamples)
         if (start > 0 && pre == 0) {
           pre = time - start;
 //printf("5\n");
+          offset = j;
         }
 //printf("4 pre:%f\n", pre);
         j++;
@@ -613,15 +620,20 @@ void BufFramesT_next_k(BufFramesT *unit, int inNumSamples)
 //printf("6\n");
       time += length; 
     }
-  } else {
+  }
+ 
+  if (count > 0 || bufFrames == 0) {
     DoneAction((int)IN0(4), unit);
   }
-  
-  OUT0(0) = out;
-  OUT0(1) = pre;
-  OUT0(2) = post;
+
+  OUT0(0) = count;
+  OUT0(1) = offset;
+  OUT0(2) = pre;
+  OUT0(3) = post;
+
   unit->prevtrig = trig;
-  unit->out = out;
+  unit->count = count;
+  unit->offset = offset;
   unit->pre = pre;
   unit->post = post;
 }
