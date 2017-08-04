@@ -116,9 +116,10 @@ BufFramesT : MultiOutUGen {
     };
   }
 
+  // TODO: Support startTime and length
   *readTimed {
-    arg server, path, startFrame = 0, numFrames = -1;
-    ^this.read(server, path, startFrame, numFrames);
+    arg server, path;
+    ^this.read(server, path);
   }
   readTimed {
     arg argpath, fileStartFrame = 0, numFrames = -1, bufStartFrame = 0;
