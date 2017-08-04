@@ -73,26 +73,26 @@ BufFramesT : MultiOutUGen {
     ^polyphony.collect{Buffer.alloc(server, frames, numChannels + 1)};
   }
   
-  detectFramesTimed {
-    var path, responder, id, frames, cond;
+  detectTimed {
+    arg startTime, length;
+    var path, responder, id, detected, cond;
     cond = Condition.new;
     id = 262144.rand;
     path = '/finalFrameT';
     responder = OSCFunc({|msg|
       if (msg[2] == id) {
-        frames = msg[3];
+        detected = msg[3..];
         cond.test = true;
         cond.signal;
       };
     }, path);
     {
-      SendReply.kr(Impulse.kr, path, FinalFrameT.kr(this), id);
-      FreeSelf.kr(Impulse.kr);
+      SendReply.kr(DC.kr(1), path, BufFramesT.kr(this, 1, startTime, length, 2), id);
     }.play(this.server.defaultGroup);
     cond.test = false;
     cond.wait;
     responder.free;
-    ^frames;
+    ^detected;
   }
 
   writeTimed {
