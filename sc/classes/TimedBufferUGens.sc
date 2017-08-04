@@ -96,13 +96,23 @@ BufFramesT : MultiOutUGen {
   }
 
   writeTimed {
-    arg path, headerFormat="aiff", numFrames, startFrame=0, completionMessage;
+    arg path, headerFormat="aiff", startTime=0, length=0;
+    var frames, offset, newStartTime, newEndTime, tmp, s;
     forkIfNeeded {
-      if (numFrames.isNil) {
-        this.updateInfo;
-        numFrames = this.detectFramesTimed;
-      };
-      this.write(path, headerFormat, "float", numFrames, startFrame, false, completionMessage);
+      #frames, offset, newStartTime, newEndTime = this.detectTimed(startTime, length);
+//[frames, offset, newStartTime, newEndTime].postln;
+      this.updateInfo;
+      this.server.sync;
+      tmp = Buffer.alloc(this.server, frames, this.numChannels);
+      this.server.sync;
+      this.copyData(tmp, 0, offset*this.numChannels, frames*this.numChannels);
+      this.server.sync;
+      tmp.set(0, newStartTime, frames-1*this.numChannels, newEndTime);
+      this.server.sync;
+      //tmp.write(path, headerFormat, "float", -1, 0, false, nil);
+      tmp.write(path, headerFormat, "float", frames, offset, false, nil);
+      this.server.sync;
+      tmp.free;
     };
   }
 
