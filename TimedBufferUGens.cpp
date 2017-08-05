@@ -592,42 +592,44 @@ void BufFramesT_next_k(BufFramesT *unit, int inNumSamples)
   float time = 0;
   float length = 0;
   float lastlength = 0;
-  uint32 j = 0;
-  bool offset_assigned = false;
+  float lasttime = 0;
+  float nexttime = 0;
+
+  bool preassigned = false;
 
   if (trig > 0.f && unit->prevtrig <= 0.f) {
     for (uint32 i = 0; i < bufSamples; i += bufChannels) {
       lastlength = length;
       length = bufData[i];
-//printf("3 length:%f bufChannels:%i end:%f time:%f\n", length, bufChannels, end, time);
-      if (length == 0 || (end > 0.f && time >= end)) {
-        if (length > 0) {
-          j++;
-        }
-        if (end > 0.f) {
-          post = lastlength - (time - end);
-        }
-        count = j;
-//printf("2 post:%f\n", post);
-
+      nexttime = time + length;
+//printf("3 length:%f lastlength:%f bufChannels:%i end:%f time:%f\n", length, lastlength, bufChannels, end, time);
+      if (length == 0) {
         break;
       }
 //printf("1 time:%f start:%f\n",time,start);
-      if (time >= start) {
-        if (offset_assigned == false && start > 0) {
-          pre = time - start;
-//printf("5\n");
-          offset = j;
-          offset_assigned = true;
-          if (time > start) {
-            j++;
-          }
-        }
-//printf("4 pre:%f j:%i\n", pre, j);
-        j++;
+      if (start == 0) {
+        count++;
+      } else if (nexttime > start) {
+        count++;
+      } else {
+        offset++;
       }
-//printf("6\n");
-      time += length; 
+
+      if (start > 0 && nexttime >= start) {
+        if (preassigned == false) {
+          pre = nexttime - start;
+          preassigned = true;
+        }
+      }
+
+      if (end > 0 && nexttime >= end) {
+//printf("2 post:%f\n", post);
+        post = length - (end - time);
+        break;
+      }
+//printf("6 offset:%i count:%i\n",offset,count);
+      lasttime = time;      
+      time = nexttime; 
     }
   }
  
