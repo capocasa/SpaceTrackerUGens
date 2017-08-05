@@ -595,7 +595,7 @@ void BufFramesT_next_k(BufFramesT *unit, int inNumSamples)
   bool offset_assigned = false;
 
   if (trig > 0.f && unit->prevtrig <= 0.f) {
-    for (uint32 i = 0; i < bufSamples; i = i + bufChannels) {
+    for (uint32 i = 0; i < bufSamples; i += bufChannels) {
       length = bufData[i];
 //printf("3 length:%f bufChannels:%i end:%f time:%f\n", length, bufChannels, end, time);
       if (length == 0 || (end > 0.f && time >= end)) {
