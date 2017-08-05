@@ -128,46 +128,74 @@ BufFramesT : MultiOutUGen {
     };
   }
 
-  // TODO: Support startTime and length
+  // TODO: Make a soundfile version of BufFramesT to avoid loading the entire buffer 
   *readTimed {
-    arg server, path, startTime=0, length=0, noteLength, buf;
-    var f, frames, offset, frame, time, noteLengthStart, noteLengthEnd, j, endTime;
-    endTime = startTime + length;
+    arg server, path, startTime=0, length=0;
+    var buf, f, frames=0, offset=0, frame, endTime=0,
+    
+    lastlength=0,noteLength=0,time=0,lasttime=0,nexttime=0,pre=0,post=0,preassigned=false;
+ 
+    if (length > 0) {
+      endTime = startTime + length;
+    };
     f = SoundFile.openRead(path);
     frame = FloatArray.newClear(f.numChannels);
     
-    j = 0;
-    time = 0;
-    if ((startTime > 0) && (length > 0)) {
-      block { |break|
-        while { f.readData(frame); frame.size > 0 } {
-          noteLength = frame[0];
-          time = time + noteLength;
-          if (noteLengthStart.isNil) {
-            if (time >= startTime) {
-              offset = j;
-              noteLengthStart = time - startTime;
-            };
-          };
-          if (time >= endTime) {
-            break.value;
-          };
-          j = j + 1;
+    block { |break|
+      while { f.readData(frame); frame.size > 0 } {
+
+        lastlength = noteLength;
+        noteLength = frame[0];
+        nexttime = time + noteLength;
+        if (noteLength == 0) {
+          break.value;
         };
+//\foo.postln;
+        if (startTime == 0) {
+          frames = frames + 1;
+        } {
+          if (nexttime > startTime) {
+             frames = frames + 1;
+          }{
+            offset = offset + 1;
+          };
+        };
+//\bar.postln;
+
+        if ((startTime > 0) && (nexttime >= startTime)) {
+          if (preassigned == false) {
+            pre = nexttime - startTime;
+            preassigned = true;
+          };
+        };
+
+//[\fuz,nexttime,endTime].postln;
+        if ((endTime > 0) && (nexttime >= endTime)) {
+          post = noteLength - (endTime - time);
+          break.value;
+        };
+        lasttime = time;      
+        time = nexttime; 
       };
-      noteLengthEnd = noteLength - (time - endTime).max(0);
-      frames = j - offset;
-    }{
-      offset = 0;
-      frames = f.numFrames;
     };
+ 
     f.close;
+
+//[frames,offset,pre, post].postln;
 
     buf=this.read(server, path, offset, frames);
     fork {
       server.sync;
-      if (noteLengthStart.notNil) {
-        buf.set(0, noteLengthStart, f.numChannels-1*frames, noteLengthEnd);
+      if (pre>0) {
+        if (post > 0) {
+          buf.set(0, pre, f.numChannels-1*frames, post);
+        }{
+          buf.set(0, pre);
+        };
+      }{
+        if (post > 0) {
+          buf.set(f.numChannels-1*frames, post);
+        };
       };
     };
     ^buf;
