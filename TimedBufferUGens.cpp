@@ -603,7 +603,7 @@ void BufFramesT_next_k(BufFramesT *unit, int inNumSamples)
         if (length > 0) {
           j++;
         }
-        count = j + 1; // j is zero-based, need 1-based for length
+        count = j;
 //printf("2 post:%f\n", post);
 
         break;
@@ -614,8 +614,12 @@ void BufFramesT_next_k(BufFramesT *unit, int inNumSamples)
           pre = time - start;
 //printf("5\n");
           offset = j;
+          offset_assigned = true;
+          if (time > start) {
+            j++;
+          }
         }
-//printf("4 pre:%f\n", pre);
+//printf("4 pre:%f j:%i\n", pre, j);
         j++;
       }
 //printf("6\n");
