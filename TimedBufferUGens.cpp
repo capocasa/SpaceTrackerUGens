@@ -592,6 +592,7 @@ void BufFramesT_next_k(BufFramesT *unit, int inNumSamples)
   float time = 0;
   float length = 0;
   uint32 j = 0;
+  bool offset_assigned = false;
 
   if (trig > 0.f && unit->prevtrig <= 0.f) {
     for (uint32 i = 0; i < bufSamples; i = i + bufChannels) {
@@ -609,7 +610,7 @@ void BufFramesT_next_k(BufFramesT *unit, int inNumSamples)
       }
 //printf("1 time:%f start:%f\n",time,start);
       if (time >= start) {
-        if (start > 0 && pre == 0) {
+        if (offset_assigned == false && start > 0) {
           pre = time - start;
 //printf("5\n");
           offset = j;
