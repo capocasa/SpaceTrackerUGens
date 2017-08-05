@@ -98,22 +98,31 @@ BufFramesT : MultiOutUGen {
   writeTimed {
     arg path, headerFormat="aiff", startTime=0, length=0;
     var frames, offset, noteLengthStart, noteLengthEnd, tmp, s;
-    forkIfNeeded {
+    fork {
       #frames, offset, noteLengthStart, noteLengthEnd = this.detectTimed(startTime, length);
 //[frames, offset, noteLengthStart, noteLengthEnd].postln;
       this.updateInfo;
       this.server.sync;
       tmp = Buffer.alloc(this.server, frames, this.numChannels);
       this.server.sync;
-this.server.sync;tmp.updateInfo;[\frames, frames, tmp.numFrames].postln;
-      this.copyData(tmp, 0, offset*this.numChannels, frames*this.numChannels);
-this.server.sync;tmp.getn(0,frames*this.numChannels,{|c|(["pre"]++c).postln});
+//this.server.sync;tmp.updateInfo;[\detectTimed, frames, offset, noteLengthStart, noteLengthEnd].postln;
+      this.copyData(tmp, 0, offset, frames);
+//this.server.sync;tmp.getn(0,frames*this.numChannels,{|c|(["pre"]++c).postln});
       this.server.sync;
-      tmp.set(0, noteLengthStart, frames-1*this.numChannels, noteLengthEnd);
-this.server.sync;tmp.getn(0,frames*this.numChannels,{|c|(["post"]++c).postln});
+      if (noteLengthStart > 0) {
+        if (noteLengthEnd > 0) {
+          tmp.set(0, noteLengthStart, frames-1*this.numChannels, noteLengthEnd);
+        }{
+          tmp.set(0, noteLengthStart);
+        };
+      }{
+        if (noteLengthEnd > 0) {
+          tmp.set(frames-1*this.numChannels, noteLengthEnd);
+        };
+      };
+//this.server.sync;tmp.getn(0,frames*this.numChannels,{|c|(["post"]++c).postln});
       this.server.sync;
-      //tmp.write(path, headerFormat, "float", -1, 0, false, nil);
-      tmp.write(path, headerFormat, "float", frames, offset, false, nil);
+      tmp.write(path, headerFormat, "float", -1, 0, false, nil);
       this.server.sync;
       tmp.free;
     };
