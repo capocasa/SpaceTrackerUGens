@@ -118,8 +118,47 @@ BufFramesT : MultiOutUGen {
 
   // TODO: Support startTime and length
   *readTimed {
-    arg server, path;
-    ^this.read(server, path);
+    arg server, path, startTime=0, length=0, noteLength, buf;
+    var f, frames, offset, frame, time, noteLengthStart, noteLengthEnd, j, endTime;
+    endTime = startTime + length;
+    f = SoundFile.openRead(path);
+    frame = FloatArray.newClear(f.numChannels);
+    
+    j = 0;
+    time = 0;
+    if ((startTime > 0) && (length > 0)) {
+      block { |break|
+        while { f.readData(frame); frame.size > 0 } {
+          noteLength = frame[0];
+          time = time + noteLength;
+          if (noteLengthStart.isNil) {
+            if (time >= startTime) {
+              offset = j;
+              noteLengthStart = time - startTime;
+            };
+          };
+          if (time >= endTime) {
+            break.value;
+          };
+          j = j + 1;
+        };
+      };
+      noteLengthEnd = noteLength - (time - endTime).max(0);
+      frames = j - offset;
+    }{
+      offset = 0;
+      frames = f.numFrames;
+    };
+    f.close;
+
+    buf=this.read(server, path, offset, frames);
+    fork {
+      server.sync;
+      if (noteLengthStart.notNil) {
+        buf.set(0, noteLengthStart, f.numChannels-1*frames, noteLengthEnd);
+      };
+    };
+    ^buf;
   }
   readTimed {
     arg argpath, fileStartFrame = 0, numFrames = -1, bufStartFrame = 0;
