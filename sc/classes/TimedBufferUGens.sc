@@ -170,11 +170,14 @@ BufFramesT : MultiOutUGen {
         };
 
 //[\fuz,nexttime,endTime].postln;
-        if ((endTime > 0) && (nexttime >= endTime)) {
+        if ((endTime > 0) && (nexttime > endTime)) {
           post = noteLength - (endTime - time);
           break.value;
         };
-        lasttime = time;      
+        if (nexttime == endTime) {
+          break.value;
+        };
+        lasttime = time;
         time = nexttime; 
       };
     };
