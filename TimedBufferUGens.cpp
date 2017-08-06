@@ -624,7 +624,7 @@ void BufFramesT_next_k(BufFramesT *unit, int inNumSamples)
 
       if (end > 0 && nexttime > end) {
         post = end - time;
-printf("2 end:%f time:%f nexttime:%f post:%f \n", end, time, nexttime, post);
+//printf("2 end:%f time:%f nexttime:%f post:%f \n", end, time, nexttime, post);
         break;
       }
       if (nexttime == end) {
