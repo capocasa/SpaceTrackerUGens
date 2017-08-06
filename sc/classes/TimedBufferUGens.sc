@@ -144,6 +144,10 @@ BufFramesT : MultiOutUGen {
     block { |break|
       while { f.readData(frame); frame.size > 0 } {
 
+        // Note: This is a transliteration of the algorithm
+        // in TimedBufferUGens.cpp in BufFramesT_next that is unit
+        // tested. It needs to be manually kept in sync
+
         lastlength = noteLength;
         noteLength = frame[0];
         nexttime = time + noteLength;
@@ -172,6 +176,10 @@ BufFramesT : MultiOutUGen {
 //[\fuz,nexttime,endTime].postln;
         if ((endTime > 0) && (nexttime > endTime)) {
           post = noteLength - (endTime - time);
+          if (time < startTime) { // corner case: within last note
+            post = pre = endTime - startTime;
+          };
+
           break.value;
         };
         if (nexttime == endTime) {

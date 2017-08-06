@@ -618,6 +618,7 @@ void BufFramesT_next_k(BufFramesT *unit, int inNumSamples)
       if (start > 0 && nexttime >= start) {
         if (preassigned == false) {
           pre = nexttime - start;
+//printf("8 start:%f time:%f nexttime:%f pre:%f \n", start, time, nexttime, pre);
           preassigned = true;
         }
       }
@@ -625,6 +626,10 @@ void BufFramesT_next_k(BufFramesT *unit, int inNumSamples)
       if (end > 0 && nexttime > end) {
         post = end - time;
 //printf("2 end:%f time:%f nexttime:%f post:%f \n", end, time, nexttime, post);
+        
+        if (time < start) { // corner case: within last note
+          post = pre = end - start;
+        }
         break;
       }
       if (nexttime == end) {
