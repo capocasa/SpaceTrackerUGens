@@ -622,9 +622,12 @@ void BufFramesT_next_k(BufFramesT *unit, int inNumSamples)
         }
       }
 
-      if (end > 0 && nexttime >= end) {
-//printf("2 post:%f\n", post);
-        post = length - (end - time);
+      if (end > 0 && nexttime > end) {
+        post = end - time;
+printf("2 end:%f time:%f nexttime:%f post:%f \n", end, time, nexttime, post);
+        break;
+      }
+      if (nexttime == end) {
         break;
       }
 //printf("6 offset:%i count:%i\n",offset,count);
