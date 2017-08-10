@@ -128,7 +128,6 @@ BufFramesT : MultiOutUGen {
     };
   }
 
-  // TODO: Make a soundfile version of BufFramesT to avoid loading the entire buffer 
   *readTimed {
     arg server, path, startTime=0, length=0;
     var buf, f, frames=0, offset=0, frame, endTime=0,
