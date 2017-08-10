@@ -98,7 +98,7 @@ BufFramesT : MultiOutUGen {
   writeTimed {
     arg path, headerFormat="aiff", startTime=0, length=0;
     var frames, offset, noteLengthStart, noteLengthEnd, tmp, s;
-    fork {
+    forkIfNeeded {
       #frames, offset, noteLengthStart, noteLengthEnd = this.detectTimed(startTime, length);
 //[frames, offset, noteLengthStart, noteLengthEnd].postln;
       this.updateInfo;
