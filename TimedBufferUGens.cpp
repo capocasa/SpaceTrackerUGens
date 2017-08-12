@@ -460,12 +460,14 @@ void RecordBufT_next(RecordBufT *unit, int inNumSamples)
       time = phase - lastphase;
       table0[0] = time + phase_increment; // Write next phase tentatively in case the synth is freed
       if (abs(inval - previnval) > 0.f) {
-        table0[0] = time; // Write current phase
+        if (phase > 0) {
+          table0[0] = time; // Write current phase
           
-        //printf("RecordBufT: wrote time %f with note %f value %f on writepos %i in frame %i. \n", time, table0[1], table0[2], writepos, x);
+          //printf("RecordBufT: wrote time %f with note %f value %f on writepos %i in frame %i. \n", time, table0[1], table0[2], writepos, x);
 
-        // Shift to next note and write values, time will be written at next
-        writepos += bufChannels;
+          // Shift to next note and write values, time will be written at next
+          writepos += bufChannels;
+        }
         if (writepos >= bufSamples) {
           // ... or quit if we're full
           done = true;
