@@ -1,11 +1,11 @@
 class:: RecordBufT
-summary:: Record to timed buffer format
+summary:: Record to SpaceTracker format
 related:: PlayBufT
 categories::  UGens>Buffer
 
 Description::
 
-Record to a timed buffer. See PlayBufT for discussion.
+Record to SpaceTracker-formatted buffer. See PlayBufT for discussion.
 
 classmethods::
 
@@ -38,7 +38,7 @@ MIDIIn.connectAll;
 s.boot;
 
 
-// Record MIDI notes to timed buffer from stepped control rate signal 
+// Record MIDI notes to SpaceTracker from stepped control rate signal 
 b=Buffer.alloc(s, 768, 3);
 (
   x={
@@ -66,7 +66,7 @@ b.getn(0,36, {|v|v.postln});
 )
 
 
-// Record 2 note polyphonic MIDI notes to timed buffer from stepped audio rate signal
+// Record 2 note polyphonic MIDI notes to SpaceTracker from stepped audio rate signal
 // (example requires JackAudioUGens for hi-res MIDI)
 b=2.collect{Buffer.alloc(s, 768, 3)};
 (

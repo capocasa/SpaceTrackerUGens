@@ -1,4 +1,4 @@
-PlayBufS : MultiOutUGen {
+PlaySpaceTracker : MultiOutUGen {
 
 	*ar { arg numChannels, bufnum=0, rate=1.0, trigger=1.0, startPos=0.0, loop=0.0, doneAction=0;
 		^this.multiNew('audio', numChannels, bufnum, rate, trigger, startPos, loop, doneAction)
@@ -15,7 +15,7 @@ PlayBufS : MultiOutUGen {
 	argNamesInputsOffset { ^2 }
 }
 
-RecordBufS : UGen {
+RecordSpaceTracker : UGen {
 	*ar { arg inputArray, bufnum=0, run=1.0, doneAction=0;
 		^this.multiNewList(
 			if (inputArray.first.isArray == false) {
@@ -36,7 +36,7 @@ RecordBufS : UGen {
 	}
 }
 
-IndexBufS : UGen {
+IndexSpaceTracker : UGen {
   *ar {
     thisMethod.notYetImplemented;
   }
@@ -46,7 +46,7 @@ IndexBufS : UGen {
 }
 
 
-// RecordBufS can never record a zero pause, because
+// RecordSpaceTracker can never record a zero pause, because
 // a trigger will always be at least one control period.
 // BufFramesT finds the first zero pause, which marks
 // the end of a recording.
@@ -65,7 +65,7 @@ BufFramesT : MultiOutUGen {
 }
 
 + Buffer {
-  *allocTimed {
+  *allocSpaceTracker {
     arg server, polyphony=1, numChannels=1, frames = 16384;
     if (polyphony == 1) {
       ^Buffer.alloc(server, frames, numChannels + 1);
@@ -73,7 +73,7 @@ BufFramesT : MultiOutUGen {
     ^polyphony.collect{Buffer.alloc(server, frames, numChannels + 1)};
   }
   
-  detectTimed {
+  detectSpaceTracker {
     arg startTime=0, length=0;
     var path, responder, id, detected, cond;
     cond = Condition.new;
@@ -95,23 +95,23 @@ BufFramesT : MultiOutUGen {
     ^detected;
   }
 
-  writeTimed {
+  writeSpaceTracker {
     arg path, headerFormat="aiff", startTime=0, length=0;
     var frames, offset, noteLengthStart, noteLengthEnd, tmp, s;
     forkIfNeeded {
-      #frames, offset, noteLengthStart, noteLengthEnd = this.detectTimed(startTime, length);
+      #frames, offset, noteLengthStart, noteLengthEnd = this.detectSpaceTracker(startTime, length);
 //[frames, offset, noteLengthStart, noteLengthEnd].postln;
       this.updateInfo;
       this.server.sync;
       if (frames == 0) {
-        "writeTimed: zero frames written for %".format(path).warn;
+        "writeSpaceTracker: zero frames written for %".format(path).warn;
         ^this;
       };
       this.server.sync;
       tmp = Buffer.alloc(this.server, frames, this.numChannels);
       this.server.sync;
       tmp.updateInfo;
-//this.server.sync;tmp.updateInfo;[\detectTimed, frames, offset, noteLengthStart, noteLengthEnd].postln;
+//this.server.sync;tmp.updateInfo;[\detectSpaceTracker, frames, offset, noteLengthStart, noteLengthEnd].postln;
       this.copyData(tmp, 0, offset, frames);
 //this.server.sync;tmp.getn(0,frames*this.numChannels,{|c|(["pre"]++c).postln});
       this.server.sync;
@@ -134,7 +134,7 @@ BufFramesT : MultiOutUGen {
     };
   }
 
-  *readTimed {
+  *readSpaceTracker {
     arg server, path, startTime=0, length=0;
     var buf, f, frames=0, offset=0, frame, endTime=0,
     
@@ -216,7 +216,7 @@ BufFramesT : MultiOutUGen {
     };
     ^buf;
   }
-  readTimed {
+  readSpaceTracker {
     arg argpath, fileStartFrame = 0, numFrames = -1, bufStartFrame = 0;
     this.read(argpath, fileStartFrame, numFrames, bufStartFrame);
   }

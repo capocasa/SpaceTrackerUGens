@@ -1,5 +1,5 @@
 class:: SpaceTrackerDraw
-summary:: A graphical utility to visualize what timed buffer data looks like.
+summary:: A graphical utility to visualize what rendered SpaceTracker data looks like.
 related:: SpaceTracker,PlayBufS,RecordBufS
 categories:: GUI
 
@@ -13,11 +13,11 @@ classmethods::
 
 method:: new 
 
-Creates a TimedBufferDraw object and immediately opens a window containing the visualization. The object may be discarded or used for closing the window.
+Creates a SpaceTrackerDraw object and immediately opens a window containing the visualization. The object may be discarded or used for closing the window.
 
 argument:: data
 
-An array of FloatArrays containing data in timed buffer format to visualize 
+An array of FloatArrays containing data in rendered SpaceTracker format to visualize 
 
 argument:: clump
 
@@ -39,7 +39,7 @@ Create some simple data and visualize it
 
 code::
 (
-  w=TimedBufferDraw([[
+  w=SpaceTrackerDraw([[
     0.5,   60, 64,
     0.125, 72, 52,
     0.125, 60, 32
@@ -57,7 +57,7 @@ code::
 w.close;
 ::
 
-Since SpaceTracker renders to timed buffer format, this utility is great for visualizing the rendering of a SpaceTracker file to experiment a little and better understand the format.
+Since SpaceTracker renders to a buffer format, this utility is great for visualizing the rendering of a SpaceTracker file to experiment a little and better understand the format.
 
 code::
 (

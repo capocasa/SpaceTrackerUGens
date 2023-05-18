@@ -1,11 +1,11 @@
 class:: PlayBufT
-summary:: Playback buffer data in timed buffer format, resulting in a stepped signal 
+summary:: Playback buffer data in rendered SpaceTracker format, resulting in a stepped signal 
 related:: RecordBufT
 categories::  UGens>Buffer
 
 Description::
 
-Timed buffer format contains in the first channel the number of seconds the
+Rendered SpaceTracker format contains in the first channel the number of seconds the
 values in the other channels are to be held. PlayBufT plays back that kind of
 data, which results in a stepped stream- a mostly constant stream of data with instant changes.
 

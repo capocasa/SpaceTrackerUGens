@@ -1,5 +1,5 @@
 
-TimedBufferUGens
+SpaceTrackerUGens
 =============
 
 Record and playback musical instrument data on the server in timed buffer format, a sparse data format for stepped signals. Allows recording in audio rate with little memory usage.
@@ -12,19 +12,19 @@ Clone sc3-plugins
     cd $MY_SOURCE_DIR
     git clone https://github.com/supercollider/sc3-plugins
 
-Clone TimedBufferUGens:
+Clone SpaceTrackerUGens:
 
     cd $MY_SOURCE_DIR
-    git clone https://github.com/carlocapocasa/TimedBufferUGens.git
+    git clone https://github.com/carlocapocasa/SpaceTrackerUGens.git
 
-Place TimedBufferUGens into your sc3-plugins without confusing git
+Place SpaceTrackerUGens into your sc3-plugins without confusing git
 
     cd $MY_SOURCE_DIR/sc3-plugins/source
-    ln -s ../../TimedBufferUGens
+    ln -s ../../SpaceTrackerUGens
 
 Include in sc3-plugins build script
 
-Edit `$MY_SOURCE_DIR/sc3-plugins/source/CMakeLists.txt` and insert a line `TimedBufferUGens` in the section `plugins without extras`
+Edit `$MY_SOURCE_DIR/sc3-plugins/source/CMakeLists.txt` and insert a line `SpaceTrackerUGens` in the section `plugins without extras`
 
 Build
 
@@ -33,21 +33,21 @@ Build
     
     # adapt to your system with the sc3-plugins readme
     cmake .. -DSUPERNOVA=on 
-    make TimedBufferUGens JackMIDIUgens_supernova
+    make SpaceTrackerUGens JackMIDIUgens_supernova
 
 Install
 
-    sudo ln -s $MY_SOURCE_DIR/sc3-plugins/build/source/TimedBufferUGens.so /usr/lib/SuperCollider/plugins
-    sudo ln -s $MY_SOURCE_DIR/sc3-plugins/build/source/TimedBufferUGens_supernova.so /usr/lib/SuperCollider/plugins 
+    sudo ln -s $MY_SOURCE_DIR/sc3-plugins/build/source/SpaceTrackerUGens.so /usr/lib/SuperCollider/plugins
+    sudo ln -s $MY_SOURCE_DIR/sc3-plugins/build/source/SpaceTrackerUGens_supernova.so /usr/lib/SuperCollider/plugins 
 
-    ln -s $MY_SOURCE_DIR/TimedBufferUGens/sc $MY_SUPERCOLLIDER_EXTENSIONS_DIR/TimedBufferUGens
+    ln -s $MY_SOURCE_DIR/SpaceTrackerUGens/sc $MY_SUPERCOLLIDER_EXTENSIONS_DIR/SpaceTrackerUGens
 
 Update
 ------
 
-    cd $MY_SOURCE_DIR/TimedBufferUGens/build
+    cd $MY_SOURCE_DIR/SpaceTrackerUGens/build
     git pull
-    make TimedBufferUGens JackMIDIUgens_supernova
+    make SpaceTrackerUGens JackMIDIUgens_supernova
 
     # restart server
 

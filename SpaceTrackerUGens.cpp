@@ -1,5 +1,5 @@
 /*
-    TimedBufferUGens Timed Buffer Format UGens for SuperCollider 
+    SpaceTrackerUGens for SuperCollider 
     Copyright (c) 2014-2017 Carlo Capocasa. All rights reserved.
     https://capocasa.net
 
@@ -23,7 +23,7 @@
 
 static InterfaceTable *ft;
 
-// For RecordBufS
+// For RecordSpaceTracker
 // from server/plugins/DelayUGens.cpp
 // keep in sync manually
 #define TAKEDOWN_IN \
@@ -49,7 +49,7 @@ static InterfaceTable *ft;
   uint32 numInputs = unit->mNumInputs - (uint32)offset; \
   if ((numInputs + 1) != bufChannels) { \
     if(unit->mWorld->mVerbosity > -1 && !unit->mDone){ \
-      Print("RecordBufS channel mismatch: numInputs %i, yet buffer has %i channels. buffer needs one more channel than numInputs to store time\n", numInputs, bufChannels); \
+      Print("RecordSpaceTracker channel mismatch: numInputs %i, yet buffer has %i channels. buffer needs one more channel than numInputs to store time\n", numInputs, bufChannels); \
     } \
     unit->mDone = true; \
     ClearUnitOutputs(unit, inNumSamples); \
@@ -121,7 +121,7 @@ handle_failure:
   return false;
 }
 
-struct PlayBufS : public Unit
+struct PlaySpaceTracker : public Unit
 {
   double m_phase;
   float m_fbufnum;
@@ -132,7 +132,7 @@ struct PlayBufS : public Unit
   float m_prevbufnum;
 };
 
-struct RecordBufS : public Unit
+struct RecordSpaceTracker : public Unit
 {
   int32 m_writepos;
   float **mIn;
@@ -143,7 +143,7 @@ struct RecordBufS : public Unit
   double m_lastphase;
 };
 
-struct IndexBufS : public Unit
+struct IndexSpaceTracker : public Unit
 {
   float m_fbufnum;
   SndBuf *m_buf;
@@ -152,7 +152,7 @@ struct IndexBufS : public Unit
 };
 
 
-struct BufFramesS: public Unit
+struct SpaceTrackerFrames: public Unit
 {
   float m_fbufnum;
   SndBuf *m_buf;
@@ -163,21 +163,21 @@ struct BufFramesS: public Unit
   float post;
 };
 
-static void PlayBufS_next(PlayBufS *unit, int inNumSamples);
-static void PlayBufS_Ctor(PlayBufS* unit);
+static void PlaySpaceTracker_next(PlaySpaceTracker *unit, int inNumSamples);
+static void PlaySpaceTracker_Ctor(PlaySpaceTracker* unit);
 
-static void RecordBufS_next(RecordBufS *unit, int inNumSamples);
-static void RecordBufS_Ctor(RecordBufS *unit);
+static void RecordSpaceTracker_next(RecordSpaceTracker *unit, int inNumSamples);
+static void RecordSpaceTracker_Ctor(RecordSpaceTracker *unit);
 
-static void IndexBufS_next_k(IndexBufS *unit, int inNumSamples);
-static void IndexBufS_Ctor(IndexBufS* unit);
+static void IndexSpaceTracker_next_k(IndexSpaceTracker *unit, int inNumSamples);
+static void IndexSpaceTracker_Ctor(IndexSpaceTracker* unit);
 
-static void BufFramesS_next_k(BufFramesS *unit, int inNumSamples);
-static void BufFramesS_Ctor(BufFramesS* unit);
+static void SpaceTrackerFrames_next_k(SpaceTrackerFrames *unit, int inNumSamples);
+static void SpaceTrackerFrames_Ctor(SpaceTrackerFrames* unit);
 
-void PlayBufS_Ctor(PlayBufS* unit)
+void PlaySpaceTracker_Ctor(PlaySpaceTracker* unit)
 {
-  SETCALC(PlayBufS_next);
+  SETCALC(PlaySpaceTracker_next);
 
   unit->m_fbufnum = -1e9f;
   unit->m_prevbufnum = -1e9f;
@@ -186,13 +186,13 @@ void PlayBufS_Ctor(PlayBufS* unit)
   unit->m_index = 0;
   unit->m_prevtrig = 0;
 
-  //PlayBufS_next(unit, 1);
+  //PlaySpaceTracker_next(unit, 1);
 
   // std::cout.precision(17);
 
 }
 
-void PlayBufS_next(PlayBufS *unit, int inNumSamples)
+void PlaySpaceTracker_next(PlaySpaceTracker *unit, int inNumSamples)
 {
   GET_BUF_SHARED
   
@@ -244,7 +244,7 @@ void PlayBufS_next(PlayBufS *unit, int inNumSamples)
       if (next == 0) {
         done = true;
       }
-      //printf("PlayBufS: initialized. rate:%f phase:%f next: %f\n bufnum:%f prevbufnum:%f\n", rate, phase, next, bufnum, prevbufnum);
+      //printf("PlaySpaceTracker: initialized. rate:%f phase:%f next: %f\n bufnum:%f prevbufnum:%f\n", rate, phase, next, bufnum, prevbufnum);
     }
     unit->m_prevbufnum = bufnum;
 
@@ -252,9 +252,9 @@ void PlayBufS_next(PlayBufS *unit, int inNumSamples)
     
     if (trig > 0.f && unit->m_prevtrig <= 0.f) {
     
-      //printf("PlayBufS: triggered. phase:%f next:%f time:%f bufnum:%f note:%f value:%f\n", phase, next, unit->m_fbufnum, frame[0], frame[1], frame[2]);
+      //printf("PlaySpaceTracker: triggered. phase:%f next:%f time:%f bufnum:%f note:%f value:%f\n", phase, next, unit->m_fbufnum, frame[0], frame[1], frame[2]);
       
-      //printf("PlayBufS: phase:%f next:%f \n", phase, next);
+      //printf("PlaySpaceTracker: phase:%f next:%f \n", phase, next);
       
       phase = IN(3)[x];
       
@@ -277,7 +277,7 @@ void PlayBufS_next(PlayBufS *unit, int inNumSamples)
         if (next > phase) {
           double prevnext;
           while (true) {
-            //printf("PlayBufS: trackback index:%i next:%f phase:%f\n", index, next, phase);
+            //printf("PlaySpaceTracker: trackback index:%i next:%f phase:%f\n", index, next, phase);
             prevnext = next;
             next -= bufData[index*bufChannels];
             
@@ -288,11 +288,11 @@ void PlayBufS_next(PlayBufS *unit, int inNumSamples)
 
             index--;
           }
-          //printf("PlayBufS: trackbacked. index:%i next:%f phase:%f\n", index, next, phase);
+          //printf("PlaySpaceTracker: trackbacked. index:%i next:%f phase:%f\n", index, next, phase);
         } else {
           // if phase==next, do nothing
           while (next < phase) {
-            //printf("PlayBufS: catchup index:%i next:%f phase:%f\n", index, next, phase);
+            //printf("PlaySpaceTracker: catchup index:%i next:%f phase:%f\n", index, next, phase);
             index++;
             if (index >= bufFrames) {
               done = true;
@@ -309,7 +309,7 @@ void PlayBufS_next(PlayBufS *unit, int inNumSamples)
             }
             next += time;
           }
-          //printf("PlayBufS: caught up. index:%i next:%f phase:%f\n", index, next, phase);
+          //printf("PlaySpaceTracker: caught up. index:%i next:%f phase:%f\n", index, next, phase);
         }
       }
 
@@ -349,7 +349,7 @@ void PlayBufS_next(PlayBufS *unit, int inNumSamples)
               done = true;
               phase = next;
               index = 0;
-              //printf("PlayBufS: Played to end. index:%i next:%f phase:%f\n", index, next, phase);
+              //printf("PlaySpaceTracker: Played to end. index:%i next:%f phase:%f\n", index, next, phase);
             }
           }
         }
@@ -369,7 +369,7 @@ void PlayBufS_next(PlayBufS *unit, int inNumSamples)
               done = true;
               phase = next;
               index = bufFrames - 1;
-              //printf("PlayBufS: Played to end. index:%i next:%f phase:%f\n", index, next, phase);
+              //printf("PlaySpaceTracker: Played to end. index:%i next:%f phase:%f\n", index, next, phase);
             }
           }
         }
@@ -389,7 +389,7 @@ void PlayBufS_next(PlayBufS *unit, int inNumSamples)
 }
 
 
-void RecordBufS_Ctor(RecordBufS *unit)
+void RecordSpaceTracker_Ctor(RecordSpaceTracker *unit)
 {
   
   unit->m_fbufnum = -1e9f;
@@ -401,17 +401,17 @@ void RecordBufS_Ctor(RecordBufS *unit)
   unit->m_phase = 0;
   unit->m_lastphase = 0;
 
-  SETCALC(RecordBufS_next);
+  SETCALC(RecordSpaceTracker_next);
 
   ClearUnitOutputs(unit, 1);
 }
   
-void RecordBufS_Dtor(RecordBufS *unit)
+void RecordSpaceTracker_Dtor(RecordSpaceTracker *unit)
 {
   TAKEDOWN_IN
 }
 
-void RecordBufS_next(RecordBufS *unit, int inNumSamples)
+void RecordSpaceTracker_next(RecordSpaceTracker *unit, int inNumSamples)
 {
 
   GET_BUF
@@ -438,7 +438,7 @@ void RecordBufS_next(RecordBufS *unit, int inNumSamples)
 
 //  if (writepos > bufSamples) {   
 //    writepos = 0;
-//    printf("RecordBufS: writepos: %i; run: %f; bufSamples: %i, fbufnum: %f, inval: %f\n", writepos, run, bufSamples, fbufnum, inval);
+//    printf("RecordSpaceTracker: writepos: %i; run: %f; bufSamples: %i, fbufnum: %f, inval: %f\n", writepos, run, bufSamples, fbufnum, inval);
 //  }
 
   if (bufFrames == 0) {
@@ -463,7 +463,7 @@ void RecordBufS_next(RecordBufS *unit, int inNumSamples)
         if (phase > 0) {
           table0[0] = time; // Write current phase
           
-          //printf("RecordBufS: wrote time %f with note %f value %f on writepos %i in frame %i. \n", time, table0[1], table0[2], writepos, x);
+          //printf("RecordSpaceTracker: wrote time %f with note %f value %f on writepos %i in frame %i. \n", time, table0[1], table0[2], writepos, x);
 
           // Shift to next note and write values, time will be written at next
           writepos += bufChannels;
@@ -512,19 +512,19 @@ void RecordBufS_next(RecordBufS *unit, int inNumSamples)
     DoneAction(IN0(2), unit);
 }
 
-void IndexBufS_Ctor(IndexBufS* unit)
+void IndexSpaceTracker_Ctor(IndexSpaceTracker* unit)
 {
-  SETCALC(IndexBufS_next_k);
+  SETCALC(IndexSpaceTracker_next_k);
 
   // no need for checkBufferST, only uses first channel, only outputs one channel
 
   unit->m_fbufnum = -1e9f;
   unit->m_val = 0;
 
-  IndexBufS_next_k(unit, 1);
+  IndexSpaceTracker_next_k(unit, 1);
 }
 
-void IndexBufS_next_k(IndexBufS *unit, int inNumSamples)
+void IndexSpaceTracker_next_k(IndexSpaceTracker *unit, int inNumSamples)
 {
   float trig = ZIN0(1);
   float startPos = ZIN0(2);
@@ -545,14 +545,14 @@ void IndexBufS_next_k(IndexBufS *unit, int inNumSamples)
       float length = bufData[index*bufChannels];
 
       if (controlDurTrunc > 0.f) {
-        //printf("IndexBufS: controlDurTruncing %f by %f to %f\n", length, fmod(length, controlDur), length-fmod(length,controlDur)); 
+        //printf("IndexSpaceTracker: controlDurTruncing %f by %f to %f\n", length, fmod(length, controlDur), length-fmod(length,controlDur)); 
         length -= fmod(length, controlDur);
       }
-      //printf("IndexBufS: controlDurTrunc:%f\n", controlDurTrunc); 
+      //printf("IndexSpaceTracker: controlDurTrunc:%f\n", controlDurTrunc); 
       val += length;
-//      printf("IndexBufS: val:%f index:%i bufFrames:%i bufChannels:%i\n", val, index, bufFrames, bufChannels);
+//      printf("IndexSpaceTracker: val:%f index:%i bufFrames:%i bufChannels:%i\n", val, index, bufFrames, bufChannels);
       if (val > startPos) {
-//        printf("IndexBufS: break at preval %f\n", preval);
+//        printf("IndexSpaceTracker: break at preval %f\n", preval);
         break;
       }
       preval = val;
@@ -566,19 +566,19 @@ void IndexBufS_next_k(IndexBufS *unit, int inNumSamples)
   unit->m_prevtrig = trig;
 }
 
-void BufFramesS_Ctor(BufFramesS* unit)
+void SpaceTrackerFrames_Ctor(SpaceTrackerFrames* unit)
 {
-  SETCALC(BufFramesS_next_k);
+  SETCALC(SpaceTrackerFrames_next_k);
   unit->m_fbufnum = -1e9f;
   unit->prevtrig = 0;
   unit->count = 0;
   unit->offset = 0;
   unit->pre = 0;
   unit->post = 0;
-  BufFramesS_next_k(unit, 1);
+  SpaceTrackerFrames_next_k(unit, 1);
 }
 
-void BufFramesS_next_k(BufFramesS *unit, int inNumSamples)
+void SpaceTrackerFrames_next_k(SpaceTrackerFrames *unit, int inNumSamples)
 {
   GET_BUF_SHARED
   uint32 count = unit->count;
@@ -659,12 +659,12 @@ void BufFramesS_next_k(BufFramesS *unit, int inNumSamples)
   unit->post = post;
 }
 
-PluginLoad(TimedBuffer)
+PluginLoad(SpaceTracker)
 {
     ft = inTable;
-    DefineSimpleUnit(IndexBufS);
-    DefineSimpleUnit(PlayBufS);
-    DefineDtorUnit(RecordBufS);
-    DefineSimpleUnit(BufFramesS);
+    DefineSimpleUnit(IndexSpaceTracker);
+    DefineSimpleUnit(PlaySpaceTracker);
+    DefineDtorUnit(RecordSpaceTracker);
+    DefineSimpleUnit(SpaceTrackerFrames);
 }
 
