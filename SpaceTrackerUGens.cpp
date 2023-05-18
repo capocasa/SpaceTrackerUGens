@@ -354,7 +354,7 @@ void PlaySpaceTracker_next(PlaySpaceTracker *unit, int inNumSamples)
           }
         }
       } else {
-        if (phase >= next) {
+        if (phase > next) {
 
           if (index < bufFrames-1) {
             index++;
