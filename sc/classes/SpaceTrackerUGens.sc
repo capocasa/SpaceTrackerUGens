@@ -1,4 +1,4 @@
-PlayBufT : MultiOutUGen {
+PlayBufS : MultiOutUGen {
 
 	*ar { arg numChannels, bufnum=0, rate=1.0, trigger=1.0, startPos=0.0, loop=0.0, doneAction=0;
 		^this.multiNew('audio', numChannels, bufnum, rate, trigger, startPos, loop, doneAction)
@@ -15,7 +15,7 @@ PlayBufT : MultiOutUGen {
 	argNamesInputsOffset { ^2 }
 }
 
-RecordBufT : UGen {
+RecordBufS : UGen {
 	*ar { arg inputArray, bufnum=0, run=1.0, doneAction=0;
 		^this.multiNewList(
 			if (inputArray.first.isArray == false) {
@@ -36,7 +36,7 @@ RecordBufT : UGen {
 	}
 }
 
-IndexBufT : UGen {
+IndexBufS : UGen {
   *ar {
     thisMethod.notYetImplemented;
   }
@@ -46,7 +46,7 @@ IndexBufT : UGen {
 }
 
 
-// RecordBufT can never record a zero pause, because
+// RecordBufS can never record a zero pause, because
 // a trigger will always be at least one control period.
 // BufFramesT finds the first zero pause, which marks
 // the end of a recording.
@@ -74,7 +74,7 @@ BufFramesT : MultiOutUGen {
   }
   
   detectTimed {
-    arg startTime, length;
+    arg startTime=0, length=0;
     var path, responder, id, detected, cond;
     cond = Condition.new;
     id = 262144.rand;
@@ -103,8 +103,14 @@ BufFramesT : MultiOutUGen {
 //[frames, offset, noteLengthStart, noteLengthEnd].postln;
       this.updateInfo;
       this.server.sync;
+      if (frames == 0) {
+        "writeTimed: zero frames written for %".format(path).warn;
+        ^this;
+      };
+      this.server.sync;
       tmp = Buffer.alloc(this.server, frames, this.numChannels);
       this.server.sync;
+      tmp.updateInfo;
 //this.server.sync;tmp.updateInfo;[\detectTimed, frames, offset, noteLengthStart, noteLengthEnd].postln;
       this.copyData(tmp, 0, offset, frames);
 //this.server.sync;tmp.getn(0,frames*this.numChannels,{|c|(["pre"]++c).postln});
@@ -144,7 +150,7 @@ BufFramesT : MultiOutUGen {
       while { f.readData(frame); frame.size > 0 } {
 
         // Note: This is a transliteration of the algorithm
-        // in TimedBufferUGens.cpp in BufFramesT_next that is unit
+        // in SpaceTrackerUGens.cpp in BufFramesT_next that is unit
         // tested. It needs to be manually kept in sync
 
         lastlength = noteLength;

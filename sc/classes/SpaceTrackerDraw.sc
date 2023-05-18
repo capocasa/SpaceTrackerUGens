@@ -1,5 +1,5 @@
 
-TimedBufferDraw {
+SpaceTrackerDraw {
   var
     <>data,
     <>clump,

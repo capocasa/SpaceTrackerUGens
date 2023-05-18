@@ -1,11 +1,11 @@
-class:: TimedBufferDraw
+class:: SpaceTrackerDraw
 summary:: A graphical utility to visualize what timed buffer data looks like.
 related:: SpaceTracker,PlayBufS,RecordBufS
 categories:: GUI
 
 description:
 
-Visualizes what polyphonic timed buffer data looks like in a GUI window to help understanding nitpicky details of the format.
+Visualizes what polyphonic rendered SpaceTracker-data looks like in a GUI window to help understanding nitpicky details of the format.
 
 On the server, this type of audio data is usually represented as an array of buffers and stored as indexed sound files. To visualize it, an array of floatarrays containing the data is used.
 
@@ -101,7 +101,7 @@ w.close;
 
 discussion::
 
-Timed buffer data and also the SpaceTracker format that renders to it for playback is great once understood, however sometimes it can help to see what kind of notes exactly a SpaceTracker formatted file will render to when it becomes multichannel. It's also great to visulaize columns of timed data itself.
+SpaceTracker format and its rendered versoin is great once understood, however sometimes it can help to see what kind of notes exactly a SpaceTracker formatted file will render to when it becomes multichannel. It's also great to visulaize columns of timed data itself.
 
-This has been used as a development tool, but is also interesting for better understanding the two formats.
+This has been used as a development tool, but is also interesting for better understanding the format.
 
