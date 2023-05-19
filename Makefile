@@ -9,11 +9,11 @@ OBJECTS=$(SOURCES:.cpp=.o)
 
 TARGET_BASENAME=$(NAME)UGens$(if $(SUPERNOVA),_supernova)
 
-ifeq ($(PLATFORM), Windows)
+ifeq ($(OS), Windows)
 EXTENSION=dll
 CC := x86_64-w64-mingw32-g++
 CXX := x86_64-w64-mingw32-g++
-else ifeq ($(PLATFORM), OSX)
+else ifeq ($(OS), OSX)
 EXTENSION=so
 CC := o64h-clang++-libc++
 CXX := o64h-clang++-libc++
